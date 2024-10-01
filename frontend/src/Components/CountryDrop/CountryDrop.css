@@ -1,0 +1,18 @@
+.lable {
+  font-size: 1.4rem;
+  text-transform: capitalize;
+  color: rgba(0, 0, 0, 0.5);
+  line-height: 1.8rem;
+}
+
+.name {
+  font-size: 1.6rem;
+  text-transform: capitalize;
+  color: #ff6a00;
+  font-weight: 700;
+  line-height: 1.8rem;
+}
+
+.icon-angle {
+  font-size: 1.6rem;
+}
