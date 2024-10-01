@@ -1,0 +1,26 @@
+.homeBannerSection {
+    position: relative;
+    overflow: hidden;
+    margin-top: 12px;
+}
+
+.homeBannerSection .slick-arrow {
+    position: absolute;
+    top: 45%;
+    z-index: 100;
+    width: 40px;
+    height: 40px;
+    background-color: #000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 100%;
+}
+
+.homeBannerSection .slick-arrow.slick-next {
+   right: 25px;
+}
+
+.homeBannerSection .slick-arrow.slick-prev {
+    left: 25px;
+}
