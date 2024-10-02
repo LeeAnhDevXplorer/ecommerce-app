@@ -1,4 +1,5 @@
 import logo from "./logo.png"
+import product_banner from "./productBanner.png"
 import banner_1 from "./banner-1.png"
 import banner_2 from "./banner-2.png"
 import banner_3 from "./banner-3.png"
@@ -6,7 +7,8 @@ import banner_4 from "./banner-4.png"
 import banner_5 from "./banner-5.png"
 import banner_6 from "./banner-6.png";
 export const assets = {
-    logo
+    logo,
+    product_banner
 }
 
 export const banner_list = {

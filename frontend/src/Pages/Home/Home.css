@@ -1,0 +1,19 @@
+
+
+.homeProducts {
+  padding: 25px 0;
+  width: 100%;
+}
+
+.homeProducts .banner {
+  width: 100%;
+  /* border-radius: 10px; */
+  overflow: hidden;
+}
+
+
+.homeProducts .banner img{
+  /* width: 100%; */
+  border-radius: 10px;
+  /* overflow: hidden; */
+}
