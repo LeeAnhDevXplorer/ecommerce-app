@@ -1,5 +1,6 @@
 .homeCat {
   padding: 35px 0;
+  overflow: hidden;
 }
 
 .homeCat .swiper .item {
