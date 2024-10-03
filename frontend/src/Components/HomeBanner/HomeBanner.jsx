@@ -17,7 +17,7 @@ const HomeBanner = () => {
       <Slider {...settings}>
         {banners.map((item, index) => {
           return (
-            <div className="item">
+            <div className="item" key={index}>
               <img className="w-100" src={item} alt={`Banner ${index + 1}`} />
             </div>
           );
