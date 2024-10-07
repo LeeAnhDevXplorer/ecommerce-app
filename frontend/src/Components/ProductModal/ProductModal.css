@@ -61,7 +61,7 @@
 }
 
 .zoomSlider .slick-current .item {
-  border: 2px solid #3bb77e;
+  border: 2px solid #ff6a00;
 }
 
 .zoomSlider .slick-arrow {
@@ -75,4 +75,102 @@
 
 .zoomSlider .slick-arrow.slick-prev {
   left: -5%;
+}
+
+.info .oldPrice {
+  font-size: 2rem;
+  text-decoration: line-through;
+}
+
+.info .netPrice {
+  font-size: 2.4rem;
+}
+
+.productDetailsModal p.mt-3 {
+    font-size: 1.5rem;
+}
+
+.badge.bg-success {
+  background-color: #e5f8ed !important;
+  color: #16b858;
+}
+
+.productDetailsModal .btn-blue {
+  background-color: #ff6a00;
+  color: #fff;
+  text-transform: capitalize;
+}
+
+.productDetailsModal .btn-big {
+  font-size: 1.8rem;
+  padding: 7px 30px;
+  min-width: auto;
+}
+
+.productDetailsModal .btn-round {
+  border-radius: 30px;
+}
+
+.quantityDrop {
+  width: 150px;
+  gap: 10px;
+}
+
+.quantityDrop button {
+  min-width: 40px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: #e1e0e0;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  color: #000;
+}
+
+.quantityDrop button svg {
+  color: #000;
+}
+
+.quantityDrop input {
+  width: 30px;
+  border: none;
+  background-color: transparent;
+  outline: none;
+  font-size: 1.5rem;
+  text-align: center;
+}
+
+button {
+  text-transform: capitalize;
+}
+
+.productDetailsModal .btn-sml {
+  font-size: 1.4rem;
+  color: #000;
+  text-transform: capitalize;
+}
+
+
+.productDetailsModal .btn-sml svg{
+  font-size: 1.8rem;
+}
+
+.productModal .actions button {
+  color: #000;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  font-size: 1rem;
+}
+
+.productModal .actions button svg{
+  font-size: 1.8rem;
+}
+
+
+.productZoom .badge {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  z-index: 100;
+  padding: 5px;
+  font-size: 1.5rem;
+  box-sizing: border-box;
 }

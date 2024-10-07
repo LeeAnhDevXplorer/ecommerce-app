@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import Rating from "@mui/material/Rating";
 import Button from "@mui/material/Button";
 import "./ProductItem.css";
@@ -6,15 +6,18 @@ import { BsArrowsFullscreen } from "react-icons/bs";
 import { FaRegHeart } from "react-icons/fa";
 import { assets } from "../../assets/assets";
 import ProductModal from "../ProductModal/ProductModal";
+import { MyContext } from "../../App";
 const ProductItem = () => {
-  const [isOpenProductModal, setisOpenProductModal] = useState(false);
+
+  const context = useContext(MyContext)
+
   const viewProductDetails = (id) => {
-    setisOpenProductModal(true);
+    context.setisOpenProductModal(true);
   };
 
-  const closeProductModal = () => {
-    setisOpenProductModal(false);
-  };
+  // const closeProductModal = () => {
+  //   context.setisOpenProductModal(false);
+  // };
   return (
     <>
       <div className="item productItem">
@@ -47,8 +50,6 @@ const ProductItem = () => {
           </div>
         </div>
       </div>
-
-      {isOpenProductModal === true && <ProductModal closeProductModal={closeProductModal}/>}
     </>
   );
 };
