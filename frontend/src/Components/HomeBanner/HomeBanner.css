@@ -1,26 +1,50 @@
 .homeBannerSection {
-    position: relative;
-    overflow: hidden;
-    margin-top: 12px;
+  position: relative;
+  /* overflow: hidden; */
+  /* margin-top: 12px; */
 }
 
-.homeBannerSection .slick-arrow {
-    position: absolute;
-    top: 45%;
-    z-index: 100;
-    width: 40px;
-    height: 40px;
-    background-color: #000;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    border-radius: 100%;
+.homeBannerSection * {
+  outline: none;
+}
+
+.homeBannerSection .swiper {
+    overflow: inherit;
+}
+
+.homeBannerSection .swiper  img {
+    overflow: hidden;
+    border-radius: 10px;
+}
+
+.homeBannerSection .swiper-button-next {
+  right: 3%;
+}
+
+.homeBannerSection .swiper-button-prev {
+  left: 3%;
+}
+
+.homeBannerSection .swiper-button-next,
+.homeBannerSection .swiper-button-prev {
+  position: absolute;
+  top: 45%;
+  z-index: 100;
+  width: 40px;
+  height: 40px;
+  background-color: #fff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 100%;
+  font-weight: bold;
+  box-shadow: 0 1px 3px rgb(0, 0, 0 / 12%), 0 1px 2px rgb(0, 0, 0 /24%);
 }
 
 .homeBannerSection .slick-arrow.slick-next {
-   right: 0px;
+  right: 0px;
 }
 
 .homeBannerSection .slick-arrow.slick-prev {
-    left: 0px;
+  left: 0px;
 }

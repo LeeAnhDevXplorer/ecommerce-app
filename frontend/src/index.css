@@ -38,3 +38,7 @@ html {
 .text-sml {
   font-size: 1.4rem;
 }
+
+.productRow2 .productItem {
+  width: 24.195%;
+}

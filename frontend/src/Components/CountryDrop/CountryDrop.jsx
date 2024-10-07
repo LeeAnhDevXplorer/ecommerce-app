@@ -1,6 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
 import Button from "@mui/material/Button";
-import DialogTitle from "@mui/material/DialogTitle";
 import Slide from "@mui/material/Slide";
 import { Dialog } from "@mui/material";
 import { FaAngleDown } from "react-icons/fa";

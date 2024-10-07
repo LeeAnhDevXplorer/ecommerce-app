@@ -22,7 +22,7 @@ const HomeCat = () => {
         >
           {menu_list.map((item, index) => {
             return (
-              <SwiperSlide>
+              <SwiperSlide key={index}>
                 <div
                   className="item text-center"
                   style={{ backgroundColor: itemBg[index] }}

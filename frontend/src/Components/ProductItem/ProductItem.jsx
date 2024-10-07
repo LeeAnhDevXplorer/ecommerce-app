@@ -1,64 +1,54 @@
-import React from "react";
-import { Swiper, SwiperSlide } from "swiper/react";
+import React, { useState } from "react";
 import Rating from "@mui/material/Rating";
-import { Navigation } from "swiper/modules";
 import Button from "@mui/material/Button";
 import "./ProductItem.css";
 import { BsArrowsFullscreen } from "react-icons/bs";
 import { FaRegHeart } from "react-icons/fa";
-import { products } from "../../assets/assets";
+import { assets } from "../../assets/assets";
+import ProductModal from "../ProductModal/ProductModal";
 const ProductItem = () => {
+  const [isOpenProductModal, setisOpenProductModal] = useState(false);
+  const viewProductDetails = (id) => {
+    setisOpenProductModal(true);
+  };
+
+  const closeProductModal = () => {
+    setisOpenProductModal(false);
+  };
   return (
     <>
-      <Swiper
-        slidesPerView={4}
-        spaceBetween={30}
-        // navigation={true}
-        pagination={{
-          clickable: true,
-        }}
-        modules={[Navigation]}
-        className="mySwiper"
-      >
-        {products.map((item) => {
-          return (
-            <SwiperSlide className="mr-2" key={item.id}>
-              <div className="item productItem">
-                <div className="imgWrapper w-100">
-                  <img src={item.image} alt="" className="w-100" />
-                  <div className="badge badge-primary">28%</div>
-                  <div className="actions">
-                    <Button>
-                      <BsArrowsFullscreen />
-                    </Button>
-                    <Button>
-                      <FaRegHeart />
-                    </Button>
-                  </div>
-                </div>
-                <div className="info">
-                  <h4>{item.name}</h4>
-                  <span className="text-success d-block">In Stock</span>
-                  <Rating
-                    className="mt-2 mb-2"
-                    name={`rating-${item.id}`}
-                    value={item.rating}
-                    readOnly
-                    size="small"
-                    precision={0.5}
-                  />
-                  <div className="d-flex">
-                    <span className="oldPrice">${item.priceOld}</span>
-                    <span className="netPrice text-danger ml-2">
-                      ${item.nextPrice}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </SwiperSlide>
-          );
-        })}
-      </Swiper>
+      <div className="item productItem">
+        <div className="imgWrapper w-100">
+          <img src={assets.product_1} alt="" className="w-100" />
+          <div className="badge badge-primary">28%</div>
+          <div className="actions">
+            <Button onClick={() => viewProductDetails(1)}>
+              <BsArrowsFullscreen />
+            </Button>
+            <Button>
+              <FaRegHeart />
+            </Button>
+          </div>
+        </div>
+        <div className="info">
+          <h4>Product Name</h4>
+          <span className="stock text-success d-block">In Stock</span>
+          <Rating
+            name="read-only"
+            value={5}
+            readOnly
+            size="small"
+            precision={0.5}
+            className="rating"
+          />
+          <div className="d-flex">
+            <span className="oldPrice">$199</span>
+            <span className="netPrice text-danger ml-2">$99</span>
+          </div>
+        </div>
+      </div>
+
+      {isOpenProductModal === true && <ProductModal closeProductModal={closeProductModal}/>}
     </>
   );
 };

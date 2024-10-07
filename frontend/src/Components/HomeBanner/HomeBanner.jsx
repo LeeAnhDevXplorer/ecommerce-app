@@ -1,28 +1,64 @@
 import React from "react";
-import Slider from "react-slick";
+
+// Import Swiper React components
+import { Swiper, SwiperSlide } from "swiper/react";
+// import required modules
+import { Autoplay, Navigation } from "swiper/modules";
+
+// Import Swiper styles
+import "swiper/css";
+import "swiper/css/navigation";
+import "swiper/css/pagination";
 import "./HomeBanner.css";
-import { banner_list, banners } from "../../assets/assets";
+import { assets } from "../../assets/assets";
 const HomeBanner = () => {
-  var settings = {
-    dots: false,
-    infinite: true,
-    speed: 500,
-    slidesToShow: 1,
-    slidesToScroll: 1,
-    arrows: true,
-    autoplay: true,
-  };
   return (
-    <div className="homeBannerSection">
-      <Slider {...settings}>
-        {banners.map((item, index) => {
-          return (
-            <div className="item" key={index}>
-              <img className="w-100" src={item} alt={`Banner ${index + 1}`} />
+    <div className="container mt-3">
+      <div className="homeBannerSection">
+        <Swiper
+          slidesPerView={1}
+          spaceBetween={15}
+          navigation={true}
+          loop={false}
+          autoplay={{
+            delay: 2500,
+            disableOnInteraction: false,
+          }}
+          modules={[Navigation, Autoplay]}
+          className="mySwiper"
+        >
+          <SwiperSlide>
+            <div className="item">
+              <img className="w-100" src={assets.banner_1} alt="" />
             </div>
-          );
-        })}
-      </Slider>
+          </SwiperSlide>
+          <SwiperSlide>
+            <div className="item">
+              <img className="w-100" src={assets.banner_2} alt="" />
+            </div>
+          </SwiperSlide>
+          <SwiperSlide>
+            <div className="item">
+              <img className="w-100" src={assets.banner_3} alt="" />
+            </div>
+          </SwiperSlide>
+          <SwiperSlide>
+            <div className="item">
+              <img className="w-100" src={assets.banner_4} alt="" />
+            </div>
+          </SwiperSlide>
+          <SwiperSlide>
+            <div className="item">
+              <img className="w-100" src={assets.banner_5} alt="" />
+            </div>
+          </SwiperSlide>
+          <SwiperSlide>
+            <div className="item">
+              <img className="w-100" src={assets.banner_6} alt="" />
+            </div>
+          </SwiperSlide>
+        </Swiper>
+      </div>
     </div>
   );
 };

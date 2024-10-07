@@ -1,0 +1,78 @@
+.productModal .MuiPaper-elevation {
+  padding: 25px;
+  max-width: 900px;
+  width: 900px;
+  position: relative;
+}
+
+.productModal .closeModal {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  color: #000;
+  min-width: 40px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+}
+
+.productModal .closeModal svg {
+  font-size: 2.2rem;
+}
+
+.productModal h4 {
+  font-size: 2.2rem;
+}
+
+.productModal span {
+  font-size: 1.6rem;
+}
+
+.productZoom {
+  width: 100%;
+  height: auto;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  padding: 0;
+  overflow: hidden;
+  border-radius: 15px;
+}
+
+.zoomSliderBig {
+  width: 100%;
+}
+
+.zoomSlider {
+  padding-top: 30px;
+}
+
+.zoomSlider .slick-slide {
+  padding-right: 20px;
+}
+
+.zoomSlider * {
+  outline: none;
+}
+
+.zoomSlider .item {
+  border: 2px solid transparent;
+  overflow: hidden;
+  border-radius: 15px;
+  cursor: pointer;
+}
+
+.zoomSlider .slick-current .item {
+  border: 2px solid #3bb77e;
+}
+
+.zoomSlider .slick-arrow {
+  top: 55%;
+  zoom: 65%;
+}
+
+.zoomSlider .slick-arrow.slick-next {
+  right: -2%;
+}
+
+.zoomSlider .slick-arrow.slick-prev {
+  left: -5%;
+}
