@@ -23,6 +23,13 @@ html {
   }
 }
 
+
+.hd {
+  font-size: 2.5rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
 .container {
   max-width: 1280px;
 }
@@ -40,5 +47,40 @@ html {
 }
 
 .productRow2 .productItem {
-  width: 24.195%;
+  width: 19.1%;
+}
+
+.productItem:hover {
+  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.25), 0 10px 10px rgba(0, 0, 0, 0.22);
+}
+
+.productListings .productItem.four {
+  width: 19.65%;
+}
+.productListings .productItem.three {
+  width: 24.6%;
+}
+.productListings .productItem.two {
+  width: 33%;
+}
+.productListings .productItem.one {
+  width:49.7%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  /* justify-content: center; */
+}
+
+.productListings .productItem.one .info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.productListings .productItem.one .info h4{
+  font-size: 2rem;
+}
+
+.productListings .productItem.one .info span{
+  font-size: 1.8rem;
 }

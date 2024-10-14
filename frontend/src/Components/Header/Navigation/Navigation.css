@@ -64,6 +64,10 @@ nav .navPart1 .catWrapper .sidebarNav ul li {
   list-style: none;
 }
 
+nav .navPart1 .catWrapper .sidebarNav ul li:hover a button {
+  color: #ff6a00;
+}
+
 nav .navPart1 .catWrapper .sidebarNav ul li button {
   color: #000;
   font-size: 1.4rem;

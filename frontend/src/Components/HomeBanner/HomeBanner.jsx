@@ -9,13 +9,47 @@ import { Autoplay, Navigation } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
+// Import css files
+import Slider from "react-slick";
+// import "slick-carousel/slick/slick.css";
+// import "slick-carousel/slick/slick-theme.css";
 import "./HomeBanner.css";
 import { assets } from "../../assets/assets";
+// import Slider from "react-slick/lib/slider";
 const HomeBanner = () => {
+
+  var settings = {
+    dots: false,
+    infinite: true,
+    speed: 500,
+    slidesToShow: 1,
+    slidesToScroll: 1,
+    arrow: true,
+    autoplay: true
+  };
   return (
-    <div className="container mt-3">
-      <div className="homeBannerSection">
-        <Swiper
+      <div className="homeBannerSection mt-2">
+        <Slider {...settings}>
+          <div className="item">
+            <img className="w-100" src={assets.banner_1} alt="" />
+          </div>
+          <div className="item">
+            <img className="w-100" src={assets.banner_2} alt="" />
+          </div>
+          <div className="item">
+            <img className="w-100" src={assets.banner_3} alt="" />
+          </div>
+          <div className="item">
+            <img className="w-100" src={assets.banner_4} alt="" />
+          </div>
+          <div className="item">
+            <img className="w-100" src={assets.banner_5} alt="" />
+          </div>
+          <div className="item">
+            <img className="w-100" src={assets.banner_6} alt="" />
+          </div>
+        </Slider>
+        {/* <Swiper
           slidesPerView={1}
           spaceBetween={15}
           navigation={true}
@@ -57,9 +91,8 @@ const HomeBanner = () => {
               <img className="w-100" src={assets.banner_6} alt="" />
             </div>
           </SwiperSlide>
-        </Swiper>
+        </Swiper> */}
       </div>
-    </div>
   );
 };
 

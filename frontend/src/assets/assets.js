@@ -22,8 +22,11 @@ import menu_8 from "./menu_8.png";
 
 import banner1 from "./banner1.png";
 import banner2 from "./banner2.png";
+import banner3 from "./banner3.jpg"
 
 import newsLetterImg from "./cuupon.png";
+
+import sidebar_banner from "./sidebar-banner.gif"
 
 export const assets = {
   logo,
@@ -39,6 +42,8 @@ export const assets = {
   banner_4,
   banner_5,
   banner_6,
+  sidebar_banner,
+  banner3
 };
 export const menu_list = [
   {
@@ -92,35 +97,7 @@ export const menu_list = [
   {
     menu_name: "Đồng hồ",
     menu_image: menu_7,
-  },
-  {
-    menu_name: "Máy ảnh",
-    menu_image: menu_8,
-  },
-  {
-    menu_name: "Đồng hồ",
-    menu_image: menu_7,
-  },
-  {
-    menu_name: "Máy ảnh",
-    menu_image: menu_8,
-  },
-  {
-    menu_name: "Đồng hồ",
-    menu_image: menu_7,
-  },
-  {
-    menu_name: "Máy ảnh",
-    menu_image: menu_8,
-  },
-  {
-    menu_name: "Đồng hồ",
-    menu_image: menu_7,
-  },
-  {
-    menu_name: "Máy ảnh",
-    menu_image: menu_8,
-  },
+  }
 ];
 
 export const bgColor = [

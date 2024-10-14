@@ -1,9 +1,10 @@
-import React, { useContext, useRef } from "react";
+import React, { useContext, useRef, useState } from "react";
 import { Dialog } from "@mui/material";
 import Button from "@mui/material/Button";
-import InnerImageZoom from "react-inner-image-zoom";
 import "react-inner-image-zoom/lib/InnerImageZoom/styles.css";
-import Slider from "react-slick";
+import "swiper/css";
+import "swiper/css/navigation";
+import "swiper/css/pagination";
 import { IoIosCloseCircleOutline } from "react-icons/io";
 import Rating from "@mui/material/Rating";
 import { IoIosHeartEmpty } from "react-icons/io";
@@ -11,36 +12,19 @@ import { MdCompareArrows } from "react-icons/md";
 import "./ProductModal.css";
 import QuantityBox from "../QuantityBox/QuantityBox";
 import { MyContext } from "../../App";
+import ProductZoom from "../ProductZoom/ProductZoom";
 const ProductModal = (props) => {
+  const [slideIndex, setSlideIndex] = useState(0);
   const zoomSliderBig = useRef();
   const zoomSlider = useRef();
 
-  var settings = {
-    dots: false,
-    infinite: false,
-    speed: 500,
-    slidesToShow: 5,
-    slidesToScroll: 1,
-    fade: false,
-    arrows: true,
-  };
-
-  var settings2 = {
-    dots: false,
-    infinite: false,
-    speed: 700,
-    slidesToShow: 1,
-    slidesToScroll: 1,
-    fade: false,
-    arrows: false,
-  };
-
   const goto = (index) => {
-    zoomSlider.current.slickGoTo(index);
-    zoomSliderBig.current.slickGoTo(index);
+    setSlideIndex(index);
+    zoomSlider.current.swiper.slideTo(index);
+    zoomSliderBig.current.swiper.slideTo(index);
   };
 
-  const context = useContext(MyContext)
+  const context = useContext(MyContext);
   return (
     <div>
       <Dialog
@@ -78,87 +62,7 @@ const ProductModal = (props) => {
 
         <div className="row mt-2 productDetailsModal">
           <div className="col-md-5">
-            <div className="productZoom position-relative">
-              <div className="badge badge-primary">28%</div>
-              <Slider
-                {...settings2}
-                className="zoomSliderBig"
-                ref={zoomSliderBig}
-              >
-                <div className="item">
-                  <InnerImageZoom
-                    zoomType="hover"
-                    zoomScale={1}
-                    src={`https://laurenashpole.github.io/react-inner-image-zoom/images/unsplash-1-large.jpg`}
-                  />
-                </div>
-                <div className="item">
-                  <InnerImageZoom
-                    zoomType="hover"
-                    zoomScale={1}
-                    src={`https://laurenashpole.github.io/react-inner-image-zoom/images/unsplash-1-large.jpg`}
-                  />
-                </div>
-                <div className="item">
-                  <InnerImageZoom
-                    zoomType="hover"
-                    zoomScale={1}
-                    src={`https://laurenashpole.github.io/react-inner-image-zoom/images/unsplash-1-large.jpg`}
-                  />
-                </div>
-                <div className="item">
-                  <InnerImageZoom
-                    zoomType="hover"
-                    zoomScale={1}
-                    src={`https://laurenashpole.github.io/react-inner-image-zoom/images/unsplash-1-large.jpg`}
-                  />
-                </div>
-                <div className="item">
-                  <InnerImageZoom
-                    zoomType="hover"
-                    zoomScale={1}
-                    src={`https://laurenashpole.github.io/react-inner-image-zoom/images/unsplash-1-large.jpg`}
-                  />
-                </div>
-              </Slider>
-            </div>
-            <Slider {...settings} className="zoomSlider" ref={zoomSlider}>
-              <div className="item">
-                <img
-                  className="w-100"
-                  onClick={() => goto(0)}
-                  src={`https://laurenashpole.github.io/react-inner-image-zoom/images/unsplash-1-large.jpg`}
-                />
-              </div>
-              <div className="item">
-                <img
-                  className="w-100"
-                  onClick={() => goto(1)}
-                  src={`https://laurenashpole.github.io/react-inner-image-zoom/images/unsplash-1-large.jpg`}
-                />
-              </div>
-              <div className="item">
-                <img
-                  className="w-100"
-                  onClick={() => goto(2)}
-                  src={`https://laurenashpole.github.io/react-inner-image-zoom/images/unsplash-1-large.jpg`}
-                />
-              </div>
-              <div className="item">
-                <img
-                  className="w-100"
-                  onClick={() => goto(3)}
-                  src={`https://laurenashpole.github.io/react-inner-image-zoom/images/unsplash-1-large.jpg`}
-                />
-              </div>
-              <div className="item">
-                <img
-                  className="w-100"
-                  onClick={() => goto(4)}
-                  src={`https://laurenashpole.github.io/react-inner-image-zoom/images/unsplash-1-large.jpg`}
-                />
-              </div>
-            </Slider>
+            <ProductZoom />
           </div>
           <div className="col-md-7">
             <div className="d-flex info align-items-center mb-3">

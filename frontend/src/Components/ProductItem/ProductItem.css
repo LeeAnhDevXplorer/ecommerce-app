@@ -5,6 +5,7 @@
   cursor: pointer;
   position: relative;
   overflow: hidden;
+  transition: all 0.245s ease-in;
 }
 
 

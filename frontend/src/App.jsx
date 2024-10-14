@@ -3,11 +3,13 @@ import { BrowserRouter } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 import Header from "./Components/Header/Header";
 import { Route, Routes } from "react-router-dom";
-
 import axios from "axios";
 import Home from "./Pages/Home/Home";
 import Footer from "./Components/Footer/Footer";
 import ProductModal from "./Components/ProductModal/ProductModal";
+import Listing from "./Pages/Listing/Listing";
+import ProductDetails from "./Pages/ProductDetails/ProductDetails";
+import Cart from "./Pages/Cart/Cart";
 
 const MyContext = createContext();
 
@@ -38,6 +40,13 @@ const App = () => {
         <Header />
         <Routes>
           <Route path="/" exact={true} element={<Home />} />
+          <Route path="/cat/:id" exact={true} element={<Listing />} />
+          <Route
+            path="/product/:id"
+            exact={true}
+            element={<ProductDetails />}
+          />
+          <Route path="/cart" exact={true} element={<Cart />} />
         </Routes>
         <Footer />
         {isOpenProductModal === true && <ProductModal />}

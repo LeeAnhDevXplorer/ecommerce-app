@@ -58,9 +58,11 @@
   overflow: hidden;
   border-radius: 15px;
   cursor: pointer;
+  height: 80px;
+  width: 80px;
 }
 
-.zoomSlider .slick-current .item {
+.zoomSlider .item_active {
   border: 2px solid #ff6a00;
 }
 
@@ -87,7 +89,7 @@
 }
 
 .productDetailsModal p.mt-3 {
-    font-size: 1.5rem;
+  font-size: 1.5rem;
 }
 
 .badge.bg-success {
@@ -149,8 +151,7 @@ button {
   text-transform: capitalize;
 }
 
-
-.productDetailsModal .btn-sml svg{
+.productDetailsModal .btn-sml svg {
   font-size: 1.8rem;
 }
 
@@ -160,10 +161,9 @@ button {
   font-size: 1rem;
 }
 
-.productModal .actions button svg{
+.productModal .actions button svg {
   font-size: 1.8rem;
 }
-
 
 .productZoom .badge {
   position: absolute;
@@ -173,4 +173,15 @@ button {
   padding: 5px;
   font-size: 1.5rem;
   box-sizing: border-box;
+}
+
+.swiper-button-prev,
+.swiper-button-next {
+  top: 75px;
+  width: 35px;
+  height: 35px;
+  background-color: #f2f2f2;
+  box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px;
+  border-radius: 100%;
+  /* font-size: 1rem; */
 }

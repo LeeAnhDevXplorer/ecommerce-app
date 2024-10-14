@@ -7,7 +7,7 @@ import { FaRegHeart } from "react-icons/fa";
 import { assets } from "../../assets/assets";
 import ProductModal from "../ProductModal/ProductModal";
 import { MyContext } from "../../App";
-const ProductItem = () => {
+const ProductItem = (props) => {
 
   const context = useContext(MyContext)
 
@@ -20,9 +20,9 @@ const ProductItem = () => {
   // };
   return (
     <>
-      <div className="item productItem">
-        <div className="imgWrapper w-100">
-          <img src={assets.product_1} alt="" className="w-100" />
+      <div className={`productItem ${props.itemView}`}>
+        <div className="imgWrapper">
+          <img src={assets.product_1} alt="" className="w-100 img_rapper" />
           <div className="badge badge-primary">28%</div>
           <div className="actions">
             <Button onClick={() => viewProductDetails(1)}>
