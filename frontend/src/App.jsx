@@ -1,24 +1,25 @@
-import React, { createContext, useEffect, useState } from "react";
-import { BrowserRouter } from "react-router-dom";
-import "bootstrap/dist/css/bootstrap.min.css";
-import Header from "./Components/Header/Header";
-import { Route, Routes } from "react-router-dom";
-import axios from "axios";
-import Home from "./Pages/Home/Home";
-import Footer from "./Components/Footer/Footer";
-import ProductModal from "./Components/ProductModal/ProductModal";
-import Listing from "./Pages/Listing/Listing";
-import ProductDetails from "./Pages/ProductDetails/ProductDetails";
-import Cart from "./Pages/Cart/Cart";
+import axios from 'axios';
+import 'bootstrap/dist/css/bootstrap.min.css';
+import React, { createContext, useEffect, useState } from 'react';
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import Footer from './Components/Footer/Footer';
+import Header from './Components/Header/Header';
+import ProductModal from './Components/ProductModal/ProductModal';
+import Cart from './Pages/Cart/Cart';
+import Home from './Pages/Home/Home';
+import Listing from './Pages/Listing/Listing';
+import ProductDetails from './Pages/ProductDetails/ProductDetails';
+import SignIn from './Pages/SignIn/SignIn';
 
 const MyContext = createContext();
 
 const App = () => {
   const [countryList, setCountruList] = useState([]);
-  const [selectedCountry, setSelectedCountry] = useState("");
+  const [selectedCountry, setSelectedCountry] = useState('');
   const [isOpenProductModal, setisOpenProductModal] = useState(false);
+  const [isHeaderFooterShow, setisHeaderFooterShow] = useState(true)
   useEffect(() => {
-    getCountry("https://countriesnow.space/api/v0.1/countries/");
+    getCountry('https://countriesnow.space/api/v0.1/countries/');
   }, []);
 
   const getCountry = async (url) => {
@@ -33,11 +34,16 @@ const App = () => {
     selectedCountry,
     isOpenProductModal,
     setisOpenProductModal,
+    isHeaderFooterShow,
+    setisHeaderFooterShow
   };
   return (
     <BrowserRouter>
       <MyContext.Provider value={values}>
-        <Header />
+        {
+          isHeaderFooterShow === true && <Header />
+        }
+        
         <Routes>
           <Route path="/" exact={true} element={<Home />} />
           <Route path="/cat/:id" exact={true} element={<Listing />} />
@@ -47,8 +53,10 @@ const App = () => {
             element={<ProductDetails />}
           />
           <Route path="/cart" exact={true} element={<Cart />} />
+          <Route path="/signIn" exact={true} element={<SignIn />} />
         </Routes>
-        <Footer />
+        {isHeaderFooterShow === true && <Footer />}
+        
         {isOpenProductModal === true && <ProductModal />}
       </MyContext.Provider>
     </BrowserRouter>

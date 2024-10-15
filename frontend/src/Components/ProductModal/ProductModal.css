@@ -97,21 +97,7 @@
   color: #16b858;
 }
 
-.productDetailsModal .btn-blue {
-  background-color: #ff6a00;
-  color: #fff;
-  text-transform: capitalize;
-}
 
-.productDetailsModal .btn-big {
-  font-size: 1.8rem;
-  padding: 7px 30px;
-  min-width: auto;
-}
-
-.productDetailsModal .btn-round {
-  border-radius: 30px;
-}
 
 .quantityDrop {
   width: 150px;
@@ -184,4 +170,117 @@ button {
   box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px;
   border-radius: 100%;
   /* font-size: 1rem; */
+}
+
+
+/* ================================ */
+.productModal .cart-btn {
+  position: relative;
+  transition: all 0.2s ease;
+  overflow: hidden;
+  background-color: #ff6a00;
+  border-radius: 30px;
+  padding: 0 30px;
+}
+
+.productModal .cart-btn:active {
+  transform: scale(0.9);
+}
+
+.productModal .cart-btn .icon1 {
+  position: absolute;
+  top: 50%;
+  left: -10%;
+  transform: translate(-50%, -50%);
+  z-index: 2;
+  font-size: 2.2rem;
+  color: #fff;
+}
+
+.productModal .cart-btn .icon2 {
+  position: absolute;
+  top: -22%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 3;
+  font-size: 1.6rem;
+  color: #fff;
+}
+
+.productModal .cart-btn .added {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #fff;
+  font-size: 1.6rem;
+  opacity: 0;
+  background-color: #ff6a00;
+  width: 100%;
+  /* padding: 7px 40px; */
+  /* border-radius: 30px; */
+}
+
+.productModal .cart-btn.clicked .icon1 {
+  animation: cart 1.5s ease-in-out forwards;
+}
+
+.productModal .cart-btn.clicked .icon2 {
+  animation: box 1.5s ease-in-out forwards;
+}
+
+.productModal .cart-btn.clicked .add-to-cart {
+  animation: text1 1.5s ease-in-out forwards;
+}
+
+.productModal .cart-btn.clicked .added {
+  animation: text2 1.5s ease-in-out forwards;
+}
+
+@keyframes cart {
+  0% {
+    left: -10%;
+  }
+  40%,
+  60% {
+    left: 50%;
+  }
+  100% {
+    left: 110%;
+  }
+}
+
+@keyframes box {
+  0%,
+  40% {
+    top: -25%;
+  }
+  60% {
+    top: 40%;
+    left: 51%;
+  }
+  100% {
+    top: 40%;
+    left: 112%;
+  }
+}
+
+@keyframes text1 {
+  0% {
+    opacity: 1;
+  }
+  20%,
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes text2 {
+  0%,
+  80% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
 }

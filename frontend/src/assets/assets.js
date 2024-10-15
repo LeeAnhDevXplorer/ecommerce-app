@@ -1,4 +1,6 @@
 import logo from "./logo.png";
+import btn_sigin_google from "./google-signin.png";
+import btn_sigin_fb from "./fb-signin.png"
 import product_banner from "./productBanner.png";
 import product_banner2 from "./productBanner-24.png";
 import banner_1 from "./banner-1.png";
@@ -43,7 +45,9 @@ export const assets = {
   banner_5,
   banner_6,
   sidebar_banner,
-  banner3
+  banner3,
+  btn_sigin_google,
+  btn_sigin_fb
 };
 export const menu_list = [
   {

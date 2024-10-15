@@ -1,18 +1,19 @@
-import React, { useContext, useRef, useState } from "react";
 import { Dialog } from "@mui/material";
 import Button from "@mui/material/Button";
+import Rating from "@mui/material/Rating";
+import React, { useContext, useRef, useState } from "react";
+import { FaBox } from 'react-icons/fa';
+import { FaCartShopping } from 'react-icons/fa6';
+import { IoIosCloseCircleOutline, IoIosHeartEmpty } from "react-icons/io";
+import { MdCompareArrows } from "react-icons/md";
 import "react-inner-image-zoom/lib/InnerImageZoom/styles.css";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
-import { IoIosCloseCircleOutline } from "react-icons/io";
-import Rating from "@mui/material/Rating";
-import { IoIosHeartEmpty } from "react-icons/io";
-import { MdCompareArrows } from "react-icons/md";
-import "./ProductModal.css";
-import QuantityBox from "../QuantityBox/QuantityBox";
 import { MyContext } from "../../App";
 import ProductZoom from "../ProductZoom/ProductZoom";
+import QuantityBox from "../QuantityBox/QuantityBox";
+import "./ProductModal.css";
 const ProductModal = (props) => {
   const [slideIndex, setSlideIndex] = useState(0);
   const zoomSliderBig = useRef();
@@ -22,6 +23,14 @@ const ProductModal = (props) => {
     setSlideIndex(index);
     zoomSlider.current.swiper.slideTo(index);
     zoomSliderBig.current.swiper.slideTo(index);
+  };
+
+  const [clicked, setClicked] = useState(false);
+  const handleClick = () => {
+    setClicked(true);
+    setTimeout(() => {
+      setClicked(false);
+    }, 3000);
   };
 
   const context = useContext(MyContext);
@@ -77,9 +86,19 @@ const ProductModal = (props) => {
             </p>
             <div className="d-flex info align-items-center">
               <QuantityBox />
-              <Button className="btn-blue btn-lg btn-big btn-round ml-3">
-                Add to cart
-              </Button>
+              <div className="btn-blue pt-1 btn-round ml-3">
+              <Button
+                  className={`cart-btn ${clicked ? "clicked" : ""}`}
+                  onClick={handleClick}
+                >
+                  <span className="btn-blue btn-lg btn-big btn-round add-to-cart">
+                    {clicked ? "Thêm thành công" : "Thêm vào giỏ hàng"}
+                  </span>
+                  {clicked && <span className="added">Thêm thành công</span>}
+                  <FaCartShopping className="icon1" />
+                  <FaBox className="icon2" />
+                </Button>
+              </div>
             </div>
             <div className="d-flex align-items-center mt-5 actions">
               <Button className="btn-round btn-sml" variant="outlined">

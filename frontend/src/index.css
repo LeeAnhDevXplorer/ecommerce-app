@@ -30,6 +30,10 @@ html {
   text-transform: uppercase;
 }
 
+.text-red {
+  color: red;
+}
+
 .container {
   max-width: 1280px;
 }
@@ -44,6 +48,22 @@ html {
 
 .text-sml {
   font-size: 1.4rem;
+}
+
+.btn-blue {
+  background-color: #ff6a00 !important;
+  color: #fff !important;
+  text-transform: capitalize !important;
+}
+
+.btn-big {
+  font-size: 1.8rem !important;
+  padding: 7px 25px !important;
+  min-width: auto !important;
+}
+
+.btn-round {
+  border-radius: 30px !important;
 }
 
 .productRow2 .productItem {

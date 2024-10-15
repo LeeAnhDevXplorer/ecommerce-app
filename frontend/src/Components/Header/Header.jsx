@@ -42,7 +42,7 @@ const Header = () => {
                     <span className="price">$3.40</span>
                     <div className="position-relative d-flex align-items-center ml-2">
                       <Button className="circle">
-                        <IoBagHandleOutline />
+                       <Link to={"/cart"}> <IoBagHandleOutline /></Link>
                       </Button>
                       <span className="count d-flex align-items-center justify-content-center">
                         1
