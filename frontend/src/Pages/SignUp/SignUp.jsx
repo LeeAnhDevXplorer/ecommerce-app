@@ -1,11 +1,10 @@
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
-import React, { useContext, useEffect } from 'react';
+import { default as React, useContext, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { MyContext } from '../../App';
 import { assets } from '../../assets/assets';
-import './SignIn.css';
-const SignIn = () => {
+const SignUp = () => {
   const context = useContext(MyContext);
   useEffect(() => {
     context.setisHeaderFooterShow(false);
@@ -33,8 +32,34 @@ const SignIn = () => {
             <div className="text-center">
               <img src={assets.logo} alt="" />
             </div>
-            <h2 className="mb-4">Sign In</h2>
+            <h2 className="mb-4">Sign Up</h2>
             <form action="" className="mt-3">
+              <div className="row">
+                <div className="col-md-6">
+                  <div className="form-group">
+                    <TextField
+                      id="standard-basic"
+                      label="Name"
+                      type="text"
+                      variant="standard"
+                      required
+                      className="w-100"
+                    />
+                  </div>
+                </div>
+                <div className="col-md-6">
+                  <div className="form-group">
+                    <TextField
+                      id="standard-basic"
+                      label="Phone No."
+                      type="text"
+                      variant="standard"
+                      required
+                      className="w-100"
+                    />
+                  </div>
+                </div>
+              </div>
               <div className="form-group">
                 <TextField
                   id="standard-basic"
@@ -55,10 +80,20 @@ const SignIn = () => {
                   className="w-100"
                 />
               </div>
-              <a className="border-effect cursor">Forgot password? </a>
+              <div className="form-group mb-4">
+                <TextField
+                  id="standard-basic"
+                  label="Repeat your password"
+                  type="password"
+                  variant="standard"
+                  required
+                  className="w-100"
+                />
+              </div>
+              {/* <a className="border-effect cursor">Forgot password? </a> */}
               <div className="d-flex align-items-center mt-3 mb-3 row">
                 <Button className="btn col btn-blue btn-lg btn-big">
-                  Sign In
+                  Sign Up
                 </Button>
                 <Link to={'/'}>
                   <Button
@@ -70,10 +105,11 @@ const SignIn = () => {
                   </Button>
                 </Link>
               </div>
+
               <p>
-                Not Registered?
-                <Link className="border-effect cursor" to={'/signUp'}>
-                  Sign Up
+                Already registered?
+                <Link className="border-effect cursor" to={'/signIn'}>
+                  LogIn
                 </Link>
               </p>
               <h4 className="social  text-center font-weight-bold mt-5">
@@ -103,4 +139,4 @@ const SignIn = () => {
   );
 };
 
-export default SignIn;
+export default SignUp;

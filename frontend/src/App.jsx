@@ -10,6 +10,7 @@ import Home from './Pages/Home/Home';
 import Listing from './Pages/Listing/Listing';
 import ProductDetails from './Pages/ProductDetails/ProductDetails';
 import SignIn from './Pages/SignIn/SignIn';
+import SignUp from './Pages/SignUp/SignUp';
 
 const MyContext = createContext();
 
@@ -18,6 +19,7 @@ const App = () => {
   const [selectedCountry, setSelectedCountry] = useState('');
   const [isOpenProductModal, setisOpenProductModal] = useState(false);
   const [isHeaderFooterShow, setisHeaderFooterShow] = useState(true)
+  const [isLogin, setisLogin] = useState(false)
   useEffect(() => {
     getCountry('https://countriesnow.space/api/v0.1/countries/');
   }, []);
@@ -35,7 +37,9 @@ const App = () => {
     isOpenProductModal,
     setisOpenProductModal,
     isHeaderFooterShow,
-    setisHeaderFooterShow
+    setisHeaderFooterShow,
+    isLogin,
+    setisLogin
   };
   return (
     <BrowserRouter>
@@ -54,6 +58,7 @@ const App = () => {
           />
           <Route path="/cart" exact={true} element={<Cart />} />
           <Route path="/signIn" exact={true} element={<SignIn />} />
+          <Route path='/signUp' exact={true} element={<SignUp/>} />
         </Routes>
         {isHeaderFooterShow === true && <Footer />}
         
