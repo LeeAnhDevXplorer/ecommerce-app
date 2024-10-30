@@ -79,7 +79,7 @@
 }
 
 .table tbody .actions {
-  justify-content: end;
+  justify-content: center;
 }
 
 .table tbody .actions button {

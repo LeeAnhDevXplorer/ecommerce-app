@@ -1,8 +1,14 @@
+import Alert from '@mui/material/Alert';
+import Snackbar from '@mui/material/Snackbar';
+import { height } from '@mui/system';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import React, { createContext, useEffect, useState } from 'react';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import LoadingBar from 'react-top-loading-bar';
 import Header from './Components/Header/Header';
 import SideBar from './Components/SideBar/SideBar';
+import Category from './Pages/Category/Category';
+import CategoryAdd from './Pages/CategoryAdd/CategoryAdd';
 import Home from './Pages/Home/Home';
 import Login from './Pages/Login/Login';
 import ProductDetails from './Pages/ProductDetails/ProductDetails';
@@ -12,6 +18,12 @@ import SignUp from './Pages/SignUp/SignUp';
 
 const MyContext = createContext();
 const App = () => {
+  const [progress, setProgress] = useState(0);
+  const [alertBox, setAlertBox] = useState({
+    msg: '',
+    error: false,
+    open: false,
+  });
   const [isToggleSiderBar, setisToggleSiderBar] = useState(false);
   const [isHide, setisHide] = useState(true);
   const [themeMode, setThemeMode] = useState(true);
@@ -22,6 +34,10 @@ const App = () => {
     setisHide,
     themeMode,
     setThemeMode,
+    alertBox,
+    setAlertBox,
+    progress,
+    setProgress,
   };
   useEffect(() => {
     if (themeMode === true) {
@@ -34,10 +50,42 @@ const App = () => {
       localStorage.setItem('themeMode', 'dark');
     }
   }, [themeMode]);
+
+  const handleClose = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+
+    setAlertBox({
+      open: false,
+    });
+  };
+
   return (
     <div>
       <BrowserRouter>
         <MyContext.Provider value={values}>
+          <LoadingBar
+            color="#1a73e8"
+            progress={progress}
+            onLoaderFinished={() => setProgress(0)}
+            style={{ height: '5px' }}
+          />
+          <Snackbar
+            open={alertBox.open}
+            autoHideDuration={5000}
+            anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+            onClose={handleClose}
+          >
+            <Alert
+              onClose={handleClose}
+              severity={alertBox.error === false ? 'success' : 'error'}
+              variant="filled"
+              sx={{ fontSize: '1.4rem' }}
+            >
+              {alertBox.msg}
+            </Alert>
+          </Snackbar>
           {isHide === true && <Header />}
 
           <div className="main d-flex">
@@ -72,6 +120,16 @@ const App = () => {
                   path="/product/productupload"
                   exact={true}
                   element={<ProductUpload />}
+                />
+                <Route
+                  path="/category/categoryadd"
+                  exact={true}
+                  element={<CategoryAdd />}
+                />
+                <Route
+                  path="/category/categorylist"
+                  exact={true}
+                  element={<Category />}
                 />
               </Routes>
             </div>

@@ -80,6 +80,37 @@ const SideBar = () => {
           </div>
         </li>
         <li>
+          <Button
+            className={`w-100 ${activeTab === 2 ? 'act' : ''}`}
+            onClick={() => handleTabClick(2)}
+          >
+            <span className="icon">
+              <FaProductHunt />
+            </span>
+            Danh mục sản phẩm
+            <span className="arrow">
+              <FaAngleRight />
+            </span>
+          </Button>
+          <div
+            className={`submenuWrapper ${
+              activeTab === 2 && isToggleSubmenu ? 'colapse' : 'colapsed'
+            }`}
+          >
+            <ul className="submenu">
+              <li>
+                <Link to={'/category/categorylist'}>Danh mục sản phẩm</Link>
+              </li>
+              {/* <li>
+                <Link to={'#'}>Xem sản phẩm</Link>
+              </li> */}
+              <li>
+                <Link to={'/category/categoryadd'}>Tải lên Danh mục</Link>
+              </li>
+            </ul>
+          </div>
+        </li>
+        {/* <li>
           <Link>
             <Button
               className={`w-100 ${activeTab === 2 ? 'act' : ''}`}
@@ -158,7 +189,7 @@ const SideBar = () => {
               </span>
             </Button>
           </Link>
-        </li>
+        </li> */}
       </ul>
       <br />
       <hr />

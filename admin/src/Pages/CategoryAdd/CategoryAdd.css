@@ -21,6 +21,7 @@
 }
 
 .form .form-group input,
+.css-w76bbz-MuiSelect-select-MuiInputBase-input-MuiOutlinedInput-input.MuiSelect-select,
 .form .form-group textarea {
   background: #fafafa;
   border: 1px solid #0000001a !important;
@@ -131,30 +132,10 @@
   text-align: center;
 }
 
-.imgGrid {
-  width: 100%;
-  gap: 10px;
-  flex-wrap: nowrap;
+.css-1toxriw-MuiList-root-MuiMenu-list {
+  padding: 0 !important;
 }
 
-.imgGrid .img {
-  width: 50%;
-  height: 100px;
-  overflow: hidden;
-  border-radius: 10px;
-}
-
-.imgGrid .img img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.stickyBox {
-  position: sticky;
-  top: 100px;
-}
-
-.stickyBox h4 {
-  font-size: 3rem;
+.css-1toxriw-MuiList-root-MuiMenu-list li:hover {
+  background-color: rgba(0, 0, 0, 0.125)!important;
 }

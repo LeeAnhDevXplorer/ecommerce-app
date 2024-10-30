@@ -128,3 +128,38 @@ body.dark .maincontainer .card-body  h4{
   width: 60px;
   height: 60px;
 }
+
+
+.css-99a237 {
+  display: flex;
+  margin-left: 16px;
+  margin-right: 16px;
+  margin-top: -25px;
+  padding-top: 24px;
+  padding-bottom: 24px;
+  padding-left: 16px;
+  padding-right: 16px;
+  opacity: 1;
+  background: linear-gradient(195deg, #49a3f1, #1a73e8);
+  color: #344767;
+  border-radius: 0.5rem;
+  box-shadow: 0rem 0.25rem 1.25rem 0rem rgba(0, 0, 0, 0.14),
+    0rem 0.4375rem 0.625rem -0.3125rem rgba(0, 187, 212, 0.4);
+}
+
+.css-66yapz-MuiTypography-root {
+  margin: 0;
+  font-size: 1.8rem;
+  line-height: 1.625;
+  font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;
+  color: #344767;
+  font-weight: 700;
+  letter-spacing: 0.0075em;
+  opacity: 1;
+  text-transform: none;
+  vertical-align: unset;
+  -webkit-text-decoration: none;
+  text-decoration: none;
+  color: #ffffff !important;
+}
+

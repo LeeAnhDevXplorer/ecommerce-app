@@ -59,7 +59,7 @@ const Products = () => {
 
   return (
     <div className="right-content w-100">
-      <div className="card shadow border-0 w-100 flex-row p-4">
+      {/* <div className="card shadow border-0 w-100 flex-row p-4">
         <h5 className="mb-0">Product List</h5>
         <Breadcrumbs aria-label="breadcrumb" className="ml-auto breadcrumbs_">
           <StyleBreadcrumb
@@ -74,9 +74,26 @@ const Products = () => {
             deleteIcon={<ExpandMoreIcon />}
           />
         </Breadcrumbs>
-      </div>
+      </div> */}
       <div className="card shadow border-0 p-3 mt-4 w-100">
-        <h3 className="hd">Danh sách sản phẩm</h3>
+        <div class="MuiBox-root css-99a237 d-felx">
+          <h6 class="MuiTypography-root MuiTypography-h6 css-66yapz-MuiTypography-root">
+            Projects Table
+          </h6>
+          <Breadcrumbs aria-label="breadcrumb" className="ml-auto breadcrumbs_">
+            <StyleBreadcrumb
+              component="a"
+              href="/"
+              label="Dashboard"
+              icon={<HomeIcon fontSize="small" />}
+            />
+            <StyleBreadcrumb
+              href="#"
+              label="Products"
+              deleteIcon={<ExpandMoreIcon />}
+            />
+          </Breadcrumbs>
+        </div>
         <div className="row cardFilter mt-4">
           <div className="col-md-3">
             <h4>SHOW BY</h4>

@@ -1,20 +1,13 @@
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import HomeIcon from '@mui/icons-material/Home';
-import {
-  Backdrop,
-  Breadcrumbs,
-  Button,
-  Chip,
-  CircularProgress,
-  MenuItem,
-  Rating,
-  Select,
-} from '@mui/material';
+import { Breadcrumbs, Chip } from '@mui/material';
+import Button from '@mui/material/Button';
+import MenuItem from '@mui/material/MenuItem';
+import Rating from '@mui/material/Rating';
+import Select from '@mui/material/Select';
 import { emphasize, styled } from '@mui/material/styles';
-import React, { useContext, useEffect, useRef, useState } from 'react';
+import React, { useState } from 'react';
 import { TiDelete } from 'react-icons/ti';
-import { MyContext } from '../../App';
-import { fetchDataFromApi } from '../../utils/api';
 import './ProductUpload.css';
 
 const StyleBreadcrumb = styled(Chip)(({ theme }) => {
@@ -38,108 +31,11 @@ const StyleBreadcrumb = styled(Chip)(({ theme }) => {
 });
 
 const ProductUpload = () => {
-  const context = useContext(MyContext);
-  const [catData, setCatData] = useState([]);
-  const [loading, setLoading] = useState(false);
   const [showCat, setShowCat] = useState('');
   const [value, setValue] = useState(0);
   const [showSubCat, setShowSubCat] = useState('');
-  const [isFeaturedVal, setisFeaturedVal] = useState('');
+  const [isshowFeatured, setisShowFeatured] = useState('');
   const [showRam, setShowRam] = useState('');
-  const [productImgArr, setProductImgArr] = useState([]);
-  const [formFields, setFormFields] = useState({
-    name: '',
-    description: '',
-    images: [],
-    brand: '',
-    price: 0,
-    oldPrice: 0,
-    category: '',
-    countInStock: 0,
-    rating: 0,
-    isFeatured: false,
-  });
-  const productImgs = useRef();
-
-  useEffect(() => {
-    setLoading(true);
-    fetchDataFromApi(`/api/category`)
-      .then((res) => {
-        if (Array.isArray(res.categoryList)) {
-          setCatData(res.categoryList);
-        } else {
-          setCatData([]);
-        }
-      })
-      .catch((error) => {
-        console.error('Error fetching data:', error);
-        setCatData([]);
-      })
-      .finally(() => {
-        setLoading(false);
-      });
-  }, []);
-  const inputChange = (e) => {
-    setFormFields(() => ({
-      ...formFields,
-      [e.target.value]: e.target.value,
-    }));
-  };
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormFields((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
-
-  const addProductImg = (e) => {
-    e.preventDefault(); // Ngăn chặn hành động mặc định của sự kiện (nếu cần)
-
-    const imageUrl = productImgs.current.value.trim(); // Lấy giá trị và loại bỏ khoảng trắng
-    if (imageUrl && !productImgArr.includes(imageUrl)) {
-      setProductImgArr((prevArr) => [...prevArr, imageUrl]);
-      setFormFields((prev) => ({
-        ...prev,
-        images: [...prev.images, imageUrl], // Cập nhật images trong formFields
-      }));
-    } else {
-      // Xử lý trường hợp giá trị không hợp lệ
-      console.warn('Invalid image URL or it already exists.');
-    }
-
-    // Xóa giá trị input sau khi thêm
-    productImgs.current.value = '';
-  };
-
-  // const handleImageUpload = (e) => {
-  //   const files = Array.from(e.target.files);
-  //   const imageUrls = files.map((file) => URL.createObjectURL(file));
-  //   setProductImgArr((prevArr) => [...prevArr, ...imageUrls]);
-  // };
-
-  const handleChangeCategory = (e) => {
-    setShowCat(e.target.value);
-    setFormFields(() => ({
-      ...formFields,
-      category: e.target.value,
-    }));
-  };
-
-  const handleisFeaturedVal = (e) => {
-    setisFeaturedVal(e.target.value);
-    setFormFields(() => ({
-      ...formFields,
-      isFeatured: e.target.value,
-    }));
-  };
-
-  const addProduct = (event) => {
-    event.preventDefault();
-    formFields.images = productImgArr;
-    console.log(formFields);
-    // Handle submission logic here (e.g., API call)
-  };
 
   return (
     <div className="right-content w-100">
@@ -160,23 +56,18 @@ const ProductUpload = () => {
           <StyleBreadcrumb label="Product Upload" />
         </Breadcrumbs>
       </div>
-      <form onSubmit={addProduct} className="form">
+      <form action="" className="form">
         <div className="row">
-          <div className="col-md-9">
-            <div className="card mt-0 p4">
+          <div className="col-md-12">
+            <div className="card mt-0 p4 w-100">
               <h5 className="mb-4">Basic Information</h5>
               <div className="form-group mb-4">
                 <h6 className="mb-2">PRODUCT NAME</h6>
-                <input type="text" name="name" onChange={handleInputChange} />
+                <input type="text" name="name" />
               </div>
               <div className="form-group">
                 <h6>DESCRIPTION</h6>
-                <textarea
-                  rows="5"
-                  cols="10"
-                  name="description"
-                  onChange={handleInputChange}
-                ></textarea>
+                <textarea rows="5" cols="10"></textarea>
               </div>
               <div className="row">
                 <div className="col">
@@ -184,18 +75,17 @@ const ProductUpload = () => {
                     <h6>CATEGORY</h6>
                     <Select
                       value={showCat}
-                      onChange={handleChangeCategory}
+                      onChange={(e) => setShowCat(e.target.value)}
                       displayEmpty
+                      inputProps={{ 'aria-label': 'Without label' }}
                       className="w-100"
                     >
                       <MenuItem value="">
                         <em>None</em>
                       </MenuItem>
-                      {catData.map((item, index) => (
-                        <MenuItem key={index} value={item._id}>
-                          {item.name}
-                        </MenuItem>
-                      ))}
+                      <MenuItem value={10}>Men</MenuItem>
+                      <MenuItem value={20}>Women</MenuItem>
+                      <MenuItem value={30}>Kids</MenuItem>
                     </Select>
                   </div>
                 </div>
@@ -206,6 +96,7 @@ const ProductUpload = () => {
                       value={showSubCat}
                       onChange={(e) => setShowSubCat(e.target.value)}
                       displayEmpty
+                      inputProps={{ 'aria-label': 'Without label' }}
                       className="w-100"
                     >
                       <MenuItem value="">
@@ -218,51 +109,41 @@ const ProductUpload = () => {
                 </div>
                 <div className="col">
                   <div className="form-group">
-                    <h6>OLD PRICE</h6>
-                    <input
-                      type="text"
-                      name="oldPrice"
-                      onChange={handleInputChange}
-                    />
+                    <h6>PRICE</h6>
+                    <input type="text" name="price" />
                   </div>
                 </div>
               </div>
+
               <div className="row">
                 <div className="col">
                   <div className="form-group">
-                    <h6>NEW PRICE</h6>
-                    <input
-                      type="text"
-                      name="price"
-                      onChange={handleInputChange}
-                    />
+                    <h6>OLD PRICE</h6>
+                    <input type="text" name="oldPrice" />
                   </div>
                 </div>
                 <div className="col">
                   <div className="form-group">
-                    <h6>Is Featured</h6>
+                    <h6>is Featured</h6>
                     <Select
-                      value={isFeaturedVal}
-                      onChange={handleisFeaturedVal}
+                      value={isshowFeatured}
+                      onChange={(e) => setisShowFeatured(e.target.value)}
                       displayEmpty
+                      inputProps={{ 'aria-label': 'Without label' }}
                       className="w-100"
                     >
                       <MenuItem value="">
                         <em>None</em>
                       </MenuItem>
-                      <MenuItem value={false}>False</MenuItem>
-                      <MenuItem value={true}>True</MenuItem>
+                      <MenuItem value={10}>True</MenuItem>
+                      <MenuItem value={20}>False</MenuItem>
                     </Select>
                   </div>
                 </div>
                 <div className="col">
                   <div className="form-group">
                     <h6>PRODUCT STOCK</h6>
-                    <input
-                      type="text"
-                      name="countInStock"
-                      onChange={handleInputChange}
-                    />
+                    <input type="text" name="stock" />
                   </div>
                 </div>
               </div>
@@ -271,11 +152,13 @@ const ProductUpload = () => {
                 <div className="col">
                   <div className="form-group">
                     <h6>BRAND</h6>
-                    <input
-                      type="text"
-                      name="brand"
-                      onChange={handleInputChange}
-                    />
+                    <input type="text" name="brand" />
+                  </div>
+                </div>
+                <div className="col">
+                  <div className="form-group">
+                    <h6>DISCOUNT</h6>
+                    <input type="text" name="discount" />
                   </div>
                 </div>
                 <div className="col">
@@ -285,6 +168,7 @@ const ProductUpload = () => {
                       value={showRam}
                       onChange={(e) => setShowRam(e.target.value)}
                       displayEmpty
+                      inputProps={{ 'aria-label': 'Without label' }}
                       className="w-100"
                     >
                       <MenuItem value="">
@@ -306,48 +190,12 @@ const ProductUpload = () => {
                       className="star_icon"
                       name="simple-controlled"
                       value={value}
-                      onChange={(e, newValue) => {
+                      onChange={(event, newValue) => {
                         setValue(newValue);
-                        setFormFields(() => ({
-                          ...formFields,
-                          rating: newValue,
-                        }));
                       }}
                     />
                   </div>
                 </div>
-              </div>
-            </div>
-          </div>
-          <div className="col-md-3">
-            <div className="stickyBox">
-              <h4>Product Images</h4>
-              <div className="imgGrid d-flex">
-                {productImgArr.length > 0 &&
-                  productImgArr.map((item, index) => (
-                    <div className="img" key={index}>
-                      <img src={item} alt="" />
-                    </div>
-                  ))}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="row">
-          <div className="col">
-            <div className="form-group">
-              <h6>product Image</h6>
-              <div className="position-relative inputBtn">
-                <input
-                  type="text"
-                  ref={productImgs}
-                  name="images"
-                  onChange={inputChange}
-                />
-                <Button onClick={addProductImg} className="btn-lg btn-blue">
-                  Add
-                </Button>
               </div>
             </div>
           </div>
@@ -394,26 +242,12 @@ const ProductUpload = () => {
               </div>
             </div>
 
-            <Button
-              type="submit"
-              className="btn-blue btn-big btn-lg btn-round w-100 mt-5"
-            >
+            <Button className="btn-blue btn-big btn-lg btn-round w-100 mt-5">
               &nbsp; PUBLISH AND VIEW
             </Button>
           </div>
         </div>
       </form>
-      <Backdrop
-        sx={{
-          color: '#fff',
-          backgroundColor: 'rgba(0, 0, 0, 0.7)',
-          transition: 'opacity 0.3s ease-in-out',
-          zIndex: 9999,
-        }}
-        open={loading}
-      >
-        <CircularProgress color="inherit" size={50} thickness={2} />
-      </Backdrop>
     </div>
   );
 };

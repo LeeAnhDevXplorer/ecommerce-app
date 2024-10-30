@@ -13,6 +13,30 @@ const router = express.Router();
 
 router.get('/', async (req, res) => {
   try {
+    const page = parseInt(req.query.page) || 1;
+    const perPage = 10;
+    const totalPosts = await Category.countDocuments();
+    const toatalPages = Math.ceil(totalPosts / perPage);
+
+    if (page > toatalPages) {
+      return res.status(404).json({ message: 'Không tìm thấy trang' });
+    }
+    const categoryList = await Category.find()
+      .skip((page - 1) * perPage)
+      .limit(perPage)
+      .exec();
+    if (!categoryList) {
+      res.status(500).json({ success: false });
+    }
+    return res.status(200).json({
+      categoryList: categoryList,
+      totalPages: toatalPages,
+      page: page,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false });
+  }
+  try {
     const categoryList = await Category.find();
     res.send(categoryList);
   } catch (error) {
@@ -36,41 +60,6 @@ router.get('/:id', async (req, res) => {
     });
   }
 });
-
-// router.post('/create', async (req, res) => {
-//   const limit = pLimit(2);
-//   const uploadStatus = await Promise.all(
-//     req.body.images.map((image) => {
-//       return limit(async () => {
-//         const result = await cloudinary.uploader.upload(image);
-//         return result;
-//       });
-//     })
-//   );
-//   const imgurl = uploadStatus.map((item) => {
-//     return item.url;
-//   });
-//   if (!uploadStatus) {
-//     return res.status(500).json({
-//       error: 'Images cannot upload!',
-//       status: false,
-//     });
-//   }
-//   let category = new Category({
-//     name: req.body.name,
-//     images: imgurl,
-//     color: req.body.color,
-//   });
-
-//   if (!category) {
-//     res.status(500).json({
-//       error: err,
-//       success: false,
-//     });
-//   }
-
-//   category = await category.save();
-// });
 
 // POST request để tạo một danh mục mới với hình ảnh
 router.post('/create', async (req, res) => {
