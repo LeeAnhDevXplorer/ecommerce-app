@@ -21,4 +21,12 @@ const categoriesSchema = new mongoose.Schema(
   { timestamps: true }
 ); // Adds createdAt and updatedAt automatically
 
+categoriesSchema.virtual('id').get(function () {
+  return this._id.toHexString();
+});
+
+categoriesSchema.set('toJSON', {
+  virtuals: true,
+});
+
 export const Category = mongoose.model('Category', categoriesSchema);

@@ -1,21 +1,36 @@
+import CloseIcon from '@mui/icons-material/Close';
+import AppBar from '@mui/material/AppBar';
 import Button from '@mui/material/Button';
+import Dialog from '@mui/material/Dialog';
+import IconButton from '@mui/material/IconButton';
+import List from '@mui/material/List';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
-import Pagination from '@mui/material/Pagination';
 import Select from '@mui/material/Select';
-import React, { useState } from 'react';
+import Slide from '@mui/material/Slide';
+import TextField from '@mui/material/TextField';
+import Toolbar from '@mui/material/Toolbar';
+import Typography from '@mui/material/Typography';
+import React, { useContext, useEffect, useState } from 'react';
 import { Chart } from 'react-google-charts';
-import { FaEye, FaPencilAlt, FaRegUserCircle } from 'react-icons/fa';
+import { FaRegUserCircle } from 'react-icons/fa';
 import { FaBagShopping, FaCartShopping } from 'react-icons/fa6';
 import { GiStarsStack } from 'react-icons/gi';
 import { HiDotsVertical } from 'react-icons/hi';
 import { IoTimerOutline } from 'react-icons/io5';
-import { MdDelete } from 'react-icons/md';
+
+
+import { MyContext } from '../../App';
 import DashboardBox from './Components/DashboardBox';
 
+import { deleteData, editData, fetchDataFromApi } from '../../utils/api';
+import ProductsTable from '../Products/Components/ProductsTable/ProductsTable';
 import './Home.css';
-import { Link } from 'react-router-dom';
+import ProductDeleteDialog from '../Products/Components/ProductDeleteDialog/ProductDeleteDialog';
 
+const Transition = React.forwardRef(function Transition(props, ref) {
+  return <Slide direction="up" ref={ref} {...props} />;
+});
 const ITEM_HEIGHT = 48;
 const data = [
   ['Year', 'Sales', 'Expenses'],
@@ -33,18 +48,162 @@ export const options = {
 const Home = () => {
   const [anchorEl, setAnchorEl] = useState(null);
   const [showBy, setShowBy] = useState('');
+  const [EditP, setEditP] = useState(null);
   const [showCat, setShowCat] = useState('');
   const [showBrand, setshowBrand] = useState('');
   const [showSearch, setshowSearch] = useState('');
+  const [deleteID, setDeleteID] = useState(null);
+  const [open, setOpen] = useState(false);
+  const [productList, setProductList] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1); // Track the current page
+  const [totalPages, setTotalPages] = useState(1);
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+  const context = useContext(MyContext);
+  const [formFields, setFormFields] = useState({
+    name: '',
+    description: '',
+    images: [],
+    brand: '',
+    price: '',
+    oldPrice: '',
+    category: '',
+    countInStock: '',
+    isFeatured: false,
+  });
+  const opens = Boolean(anchorEl);
+  useEffect(() => {
+    fetchProducts(); // Initial fetch for products
+  }, []);
 
-  const open = Boolean(anchorEl);
+  const fetchProducts = async (page = 1) => {
+    setLoading(true);
+    try {
+      const response = await fetchDataFromApi(`/api/products?page=${page}`);
+      if (response.success) {
+        setProductList(response.data);
+        setTotalPages(response.totalPages);
+        setCurrentPage(response.page);
+      } else {
+        setProductList([]);
+      }
+    } catch (error) {
+      console.error('Error fetching products:', error);
+      context.setAlertBox({
+        error: true,
+        msg: 'Failed to fetch products',
+        open: true,
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
   };
 
+  // const handleClose = () => {
+  //   setAnchorEl(null);
+  // };
+
+  // ----------------
+  const handleCloseDeleteDialog = () => {
+    setOpenDeleteDialog(false); // Đóng dialog xóa
+    setDeleteID(null); // Đặt lại ID xóa
+  };
+
+  const handleOpenDeleteDialog = (_id) => {
+    setDeleteID(_id); // Cập nhật ID của danh mục đang xóa
+    setOpenDeleteDialog(false); // Mở dialog xóa
+  };
+  const changeInput = (e) => {
+    const { name, value } = e.target;
+    setFormFields((prevFields) => ({
+      ...prevFields,
+      [name]: value,
+    }));
+  };
+
+  const handlePageChange = (event, value) => {
+    setCurrentPage(value); // Update the current page
+    fetchProducts(value); // Fetch products for the selected page
+  };
   const handleClose = () => {
+    setOpen(false); // Đóng dialog
     setAnchorEl(null);
+  };
+
+  const handleEditP = async (_id) => {
+    setOpen(true);
+    setEditP(_id);
+    try {
+      const res = await fetchDataFromApi(`/api/products/${_id}`);
+      if (res) {
+        setFormFields({
+          name: res.name,
+          description: res.description,
+          images: res.images || [], // Set an empty array if images are undefined
+          brand: res.brand || '',
+          price: res.price || '',
+          oldPrice: res.oldPrice || '',
+          category: res.category ? res.category.name : '', // assuming res.category is an object
+          countInStock: res.countInStock || '',
+          isFeatured: res.isFeatured || false,
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching product data for edit:', error);
+    }
+  };
+
+  const editPFun = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      await editData(`/api/products/${EditP}`, {
+        name: formFields.name,
+        description: formFields.description,
+        images: formFields.images, // Assuming images is an array of URLs
+        brand: formFields.brand,
+        price: formFields.price,
+        oldPrice: formFields.oldPrice,
+        category: formFields.category,
+        countInStock: formFields.countInStock,
+        isFeatured: formFields.isFeatured,
+      });
+      await fetchProducts(); // Refresh product list after editing
+      handleClose(); // Close the dialog after saving
+    } catch (error) {
+      console.error('Failed to edit product:', error);
+    } finally {
+      setLoading(false); // Stop loading spinner
+      context.setAlertBox({
+        error: false,
+        msg: 'Product edited successfully',
+        open: true,
+      });
+    }
+  };
+
+  const handleDeleteConfirm = async () => {
+    try {
+      await deleteData(`/api/products/${deleteID}`);
+      fetchProducts();
+      handleCloseDeleteDialog();
+      context.setAlertBox({
+        error: false,
+        msg: 'Product deleted successfully',
+        open: true,
+      });
+    } catch (error) {
+      console.error('Failed to delete product:', error);
+      context.setAlertBox({
+        error: true,
+        msg: 'Error deleting product',
+        open: true,
+      });
+    }
   };
 
   return (
@@ -79,8 +238,8 @@ const Home = () => {
                 className="ml-auto toggleIcon"
                 aria-label="more"
                 id="long-button"
-                aria-controls={open ? 'long-menu' : undefined}
-                aria-expanded={open ? 'true' : undefined}
+                aria-controls={opens ? 'long-menu' : undefined}
+                aria-expanded={opens ? 'true' : undefined}
                 aria-haspopup="true"
                 onClick={handleClick}
               >
@@ -92,7 +251,7 @@ const Home = () => {
                   'aria-labelledby': 'long-button',
                 }}
                 anchorEl={anchorEl}
-                open={open}
+                open={opens}
                 onClose={handleClose}
                 slotProps={{
                   paper: {
@@ -205,249 +364,14 @@ const Home = () => {
             </Select>
           </div>
         </div>
-        <div className="table-responsive w-100 mt-5">
-          <table className="table table-bordered v-align">
-            <thead className="thead-dark">
-              <tr>
-                <th>UID</th>
-                <th>PRODUCT</th>
-                <th>CATEGORY</th>
-                <th>BRAND</th>
-                <th>PRICE</th>
-                <th>STOCK</th>
-                <th>RATING</th>
-                <th>ORDER</th>
-                <th>SALES</th>
-                <th>ACTION</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>1</td>
-                <td>
-                  <div className="d-flex align-items-center productBox">
-                    <div className="imgWrapper">
-                      <div className="img">
-                        <img
-                          src="https://tronhouse.com/assets/data/editor/source/nhung-cach-chup-hinh-quan-ao-duoc-uu-chuong-nhat/chup-hinh-sang-tao-1.jpg"
-                          alt=""
-                          className="w-100"
-                        />
-                      </div>
-                    </div>
-                    <div className="info">
-                      <h6>Product 1 hahahahahahahahahahahaha</h6>
-                      <p>Description hahahahahahhahahahahahahha</p>
-                    </div>
-                  </div>
-                </td>
-                <td>Category 1</td>
-                <td>Brand 1</td>
-                <td>
-                  <span className="old">$100</span>
-                  <span className="new text-danger">$59</span>
-                </td>
-                <td>10</td>
-                <td>4.5 (16)</td>
-                <td>Order</td>
-                <td>$99k</td>
-                <td>
-                  <div className="actions d-flex align-items-center">
-                    <Link to={'/producDetails'}>
-                      <Button className="secondary" color="secondary">
-                        <FaEye />
-                      </Button>
-                    </Link>
-                    <Button className="success" color="success">
-                      <FaPencilAlt />
-                    </Button>
-                    <Button className="error" color="error">
-                      <MdDelete />
-                    </Button>
-                  </div>
-                </td>
-              </tr>
-              <tr>
-                <td>1</td>
-                <td>
-                  <div className="d-flex align-items-center productBox">
-                    <div className="imgWrapper">
-                      <div className="img">
-                        <img
-                          src="https://tronhouse.com/assets/data/editor/source/nhung-cach-chup-hinh-quan-ao-duoc-uu-chuong-nhat/chup-hinh-sang-tao-1.jpg"
-                          alt=""
-                          className="w-100"
-                        />
-                      </div>
-                    </div>
-                    <div className="info">
-                      <h6>Product 1 hahahahahahahahahahahaha</h6>
-                      <p>Description hahahahahahhahahahahahahha</p>
-                    </div>
-                  </div>
-                </td>
-                <td>Category 1</td>
-                <td>Brand 1</td>
-                <td>
-                  <span className="old">$100</span>
-                  <span className="new text-danger">$59</span>
-                </td>
-                <td>10</td>
-                <td>4.5 (16)</td>
-                <td>Order</td>
-                <td>$99k</td>
-                <td>
-                  <div className="actions d-flex align-items-center">
-                    <Button className="secondary" color="secondary">
-                      <FaEye />
-                    </Button>
-                    <Button className="success" color="success">
-                      <FaPencilAlt />
-                    </Button>
-                    <Button className="error" color="error">
-                      <MdDelete />
-                    </Button>
-                  </div>
-                </td>
-              </tr>
-              <tr>
-                <td>1</td>
-                <td>
-                  <div className="d-flex align-items-center productBox">
-                    <div className="imgWrapper">
-                      <div className="img">
-                        <img
-                          src="https://tronhouse.com/assets/data/editor/source/nhung-cach-chup-hinh-quan-ao-duoc-uu-chuong-nhat/chup-hinh-sang-tao-1.jpg"
-                          alt=""
-                          className="w-100"
-                        />
-                      </div>
-                    </div>
-                    <div className="info">
-                      <h6>Product 1 hahahahahahahahahahahaha</h6>
-                      <p>Description hahahahahahhahahahahahahha</p>
-                    </div>
-                  </div>
-                </td>
-                <td>Category 1</td>
-                <td>Brand 1</td>
-                <td>
-                  <span className="old">$100</span>
-                  <span className="new text-danger">$59</span>
-                </td>
-                <td>10</td>
-                <td>4.5 (16)</td>
-                <td>Order</td>
-                <td>$99k</td>
-                <td>
-                  <div className="actions d-flex align-items-center">
-                    <Button className="secondary" color="secondary">
-                      <FaEye />
-                    </Button>
-                    <Button className="success" color="success">
-                      <FaPencilAlt />
-                    </Button>
-                    <Button className="error" color="error">
-                      <MdDelete />
-                    </Button>
-                  </div>
-                </td>
-              </tr>
-              <tr>
-                <td>1</td>
-                <td>
-                  <div className="d-flex align-items-center productBox">
-                    <div className="imgWrapper">
-                      <div className="img">
-                        <img
-                          src="https://tronhouse.com/assets/data/editor/source/nhung-cach-chup-hinh-quan-ao-duoc-uu-chuong-nhat/chup-hinh-sang-tao-1.jpg"
-                          alt=""
-                          className="w-100"
-                        />
-                      </div>
-                    </div>
-                    <div className="info">
-                      <h6>Product 1 hahahahahahahahahahahaha</h6>
-                      <p>Description hahahahahahhahahahahahahha</p>
-                    </div>
-                  </div>
-                </td>
-                <td>Category 1</td>
-                <td>Brand 1</td>
-                <td>
-                  <span className="old">$100</span>
-                  <span className="new text-danger">$59</span>
-                </td>
-                <td>10</td>
-                <td>4.5 (16)</td>
-                <td>Order</td>
-                <td>$99k</td>
-                <td>
-                  <div className="actions d-flex align-items-center">
-                    <Button className="secondary" color="secondary">
-                      <FaEye />
-                    </Button>
-                    <Button className="success" color="success">
-                      <FaPencilAlt />
-                    </Button>
-                    <Button className="error" color="error">
-                      <MdDelete />
-                    </Button>
-                  </div>
-                </td>
-              </tr>
-              <tr>
-                <td>1</td>
-                <td>
-                  <div className="d-flex align-items-center productBox">
-                    <div className="imgWrapper">
-                      <div className="img">
-                        <img
-                          src="https://tronhouse.com/assets/data/editor/source/nhung-cach-chup-hinh-quan-ao-duoc-uu-chuong-nhat/chup-hinh-sang-tao-1.jpg"
-                          alt=""
-                          className="w-100"
-                        />
-                      </div>
-                    </div>
-                    <div className="info">
-                      <h6>Product 1 hahahahahahahahahahahaha</h6>
-                      <p>Description hahahahahahhahahahahahahha</p>
-                    </div>
-                  </div>
-                </td>
-                <td>Category 1</td>
-                <td>Brand 1</td>
-                <td>
-                  <span className="old">$100</span>
-                  <span className="new text-danger">$59</span>
-                </td>
-                <td>10</td>
-                <td>4.5 (16)</td>
-                <td>Order</td>
-                <td>$99k</td>
-                <td>
-                  <div className="actions d-flex align-items-center">
-                    <Button className="secondary" color="secondary">
-                      <FaEye />
-                    </Button>
-                    <Button className="success" color="success">
-                      <FaPencilAlt />
-                    </Button>
-                    <Button className="error" color="error">
-                      <MdDelete />
-                    </Button>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-          <div className="d-flex tableFooter">
-            <p>
-              Showing <b>12</b> of <b>60</b> Results
-            </p>
-            <Pagination count={10} color="primary" className="pagination" />
-          </div>
-        </div>
+        <ProductsTable
+          productList={productList}
+          context={context}
+          loading={loading}
+          handleEditP={handleEditP}
+          handleOpenDeleteDialog={handleOpenDeleteDialog}
+          isHomePage={false}
+        />
       </div>
     </div>
   );

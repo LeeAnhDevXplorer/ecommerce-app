@@ -8,16 +8,19 @@ import LoadingBar from 'react-top-loading-bar';
 import Header from './Components/Header/Header';
 import SideBar from './Components/SideBar/SideBar';
 import Category from './Pages/Category/Category';
-import CategoryAdd from './Pages/CategoryAdd/CategoryAdd';
+import CategoryAdd from './Pages/Category/CategoryAdd';
 import Home from './Pages/Home/Home';
 import Login from './Pages/Login/Login';
-import ProductDetails from './Pages/ProductDetails/ProductDetails';
+// import ProductDetails from './Pages/Products/ProductDetails';
 import Products from './Pages/Products/Products';
-import ProductUpload from './Pages/ProductUpload/ProductUpload';
+// import ProductUpload from './Pages/Products/ProductUpload';
 import SignUp from './Pages/SignUp/SignUp';
+import ProductUpload from './Pages/Products/ProductUpload';
+import ProductDetails from './Pages/Products/ProductDetails';
 
 const MyContext = createContext();
 const App = () => {
+  const [baseUrl, setBaseUrl] = useState('http://localhost:4000');
   const [progress, setProgress] = useState(0);
   const [alertBox, setAlertBox] = useState({
     msg: '',
@@ -38,6 +41,8 @@ const App = () => {
     setAlertBox,
     progress,
     setProgress,
+    baseUrl,
+    setBaseUrl,
   };
   useEffect(() => {
     if (themeMode === true) {
@@ -107,7 +112,7 @@ const App = () => {
                 <Route path="/login" exact={true} element={<Login />} />
                 <Route path="/signup" exact={true} element={<SignUp />} />
                 <Route
-                  path="/producDetails"
+                  path="product/producDetails"
                   exact={true}
                   element={<ProductDetails />}
                 />

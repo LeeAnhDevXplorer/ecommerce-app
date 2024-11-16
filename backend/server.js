@@ -14,6 +14,7 @@ app.options('*', cors());
 app.use(express.json());
 
 // Router
+app.use("/uploads", express.static("uploads"))
 app.use('/api/category', categoryRouter);
 app.use('/api/products', productRoter);
 

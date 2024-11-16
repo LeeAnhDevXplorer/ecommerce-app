@@ -5,10 +5,11 @@ export const assets = {
 };
 
 export const bgColor = [
-  '#fffceb',
-  '#ecffec',
-  '#feefea',
-  '#fff3eb',
-  '#fff3ff',
-  '#f2fce4',
+  "#BFECFF",
+  "#CDC1FF",
+  "#FFCCEA",
+  "#133E87",
+  "#FFA24C",
+  "#789DBC",
+  "#A0D683"
 ];

@@ -9,9 +9,11 @@ export const fetchDataFromApi = async (url) => {
 };
 
 export const postData = async (url, formData) => {
-  const { data } = await axios.post(new URL(url, BASE_URL), formData); // Use new URL()
+  const { data } = await axios.post(new URL(url, BASE_URL), formData);
   return data;
 };
+
+
 // Hàm để cập nhật dữ liệu
 export const editData = async (url, updateData) => {
   // Hàm để cập nhật dữ liệu
@@ -23,4 +25,3 @@ export const deleteData = async (url) => {
   const { data } = await axios.delete(new URL(url, BASE_URL)); // Không cần id ở đây
   return data; // Trả về dữ liệu sau khi xóa
 };
-

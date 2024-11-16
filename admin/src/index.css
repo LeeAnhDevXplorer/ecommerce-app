@@ -1,5 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap');
-
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 body {
   background-color: #ebe9e9;
   overflow-x: hidden;
@@ -11,8 +13,14 @@ html {
   line-height: 1.6rem;
   font-family: 'Open Sans', sans-serif;
 }
-h1, h2, h3, h4, h5, h6, p {
-    color: #403e57 !important;
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p {
+  color: #403e57 !important;
 }
 
 .btn-blue {
@@ -81,7 +89,7 @@ body.dark .main .sidebarWrapper .sideBar {
 body.dark header button.rounded-circle,
 body.dark .searchBox,
 body.dark,
-body.dark .main .card{
+body.dark .main .card {
   background-color: #11254e;
 }
 
@@ -98,7 +106,10 @@ body.dark .main .sidebarWrapper .sideBar ul .submenu li a,
 body.dark .main .sidebarWrapper .sideBar ul li button span svg,
 body.dark .main .card h3,
 body.dark .main .card h4,
-body.dark .main .card .css-sc8y68-MuiInputBase-root-MuiOutlinedInput-root-MuiSelect-root,
+body.dark
+  .main
+  .card
+  .css-sc8y68-MuiInputBase-root-MuiOutlinedInput-root-MuiSelect-root,
 body.dark .content .card .table tbody tr td,
 body.dark .tableFooter nav ul li button,
 body.dark .tableFooter p {
@@ -106,11 +117,16 @@ body.dark .tableFooter p {
   color: #fff;
 }
 
-body.dark .table-bordered td,  .table-bordered th {
+body.dark .table-bordered td,
+.table-bordered th {
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-body.dark .main .card .cardFilter .css-w76bbz-MuiSelect-select-MuiInputBase-input-MuiOutlinedInput-input.MuiSelect-select {
+body.dark
+  .main
+  .card
+  .cardFilter
+  .css-w76bbz-MuiSelect-select-MuiInputBase-input-MuiOutlinedInput-input.MuiSelect-select {
   border: 2px solid #fff;
   outline: #fff;
 }
@@ -119,16 +135,14 @@ body.dark .sideBar ul .submenu li a:hover,
 body.dark header button.rounded-circle:hover svg {
   color: #0858f7 !important;
 }
-body.dark .maincontainer .card-body  h4{
+body.dark .maincontainer .card-body h4 {
   color: #11254e;
 }
-
 
 .userImg.lg {
   width: 60px;
   height: 60px;
 }
-
 
 .css-99a237 {
   display: flex;
@@ -163,3 +177,19 @@ body.dark .maincontainer .card-body  h4{
   color: #ffffff !important;
 }
 
+.css-w76bbz-MuiSelect-select-MuiInputBase-input-MuiOutlinedInput-input.css-w76bbz-MuiSelect-select-MuiInputBase-input-MuiOutlinedInput-input.css-w76bbz-MuiSelect-select-MuiInputBase-input-MuiOutlinedInput-input {
+  display: flex;
+  align-items: center;
+  justify-content: start;
+  font-size: 1.6rem;
+  line-height: 1.6rem;
+}
+
+.css-16wblaj-MuiInputBase-input-MuiOutlinedInput-input,
+.css-113d811-MuiFormLabel-root-MuiInputLabel-root {
+  font-size: 1.6rem !important;
+}
+
+.css-113d811-MuiFormLabel-root-MuiInputLabel-root {
+  background-color: #fff;
+}

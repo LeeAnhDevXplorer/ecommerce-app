@@ -1,4 +1,3 @@
-// Imports
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import HomeIcon from '@mui/icons-material/Home';
 import {
@@ -7,22 +6,18 @@ import {
   Button,
   Chip,
   CircularProgress,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogContentText,
-  DialogTitle,
-  Pagination,
-  TextField,
 } from '@mui/material';
 import { emphasize, styled } from '@mui/material/styles';
 import React, { useContext, useEffect, useState } from 'react';
-import { FaPencilAlt } from 'react-icons/fa';
-import { MdDelete } from 'react-icons/md';
 import { Link } from 'react-router-dom';
 import { MyContext } from '../../App';
+import { bgColor } from '../../assets/assets';
 import { deleteData, editData, fetchDataFromApi } from '../../utils/api';
 import './Category.css';
+import CategoryPagination from './Components/CategoryPagination/CategoryPagination';
+import CategoryTable from './Components/CategoryTable/CategoryTable';
+import DeleteDialog from './Components/DeleteDialog/DeleteDialog';
+import EditCategoryDialog from './Components/EditCategoryDialog/EditCategoryDialog';
 
 // Styled Component
 const StyleBreadcrumb = styled(Chip)(({ theme }) => {
@@ -48,10 +43,10 @@ const StyleBreadcrumb = styled(Chip)(({ theme }) => {
 // Main Component
 const Category = () => {
   const context = useContext(MyContext);
-  const [loading, setLoading] = useState(false); // Trạng thái loading
+  const [loading, setLoading] = useState(false);
   const [formFields, setFormFields] = useState({
     name: '',
-    images: '',
+    images: [],
     color: '',
   });
   const [open, setOpen] = useState(false);
@@ -59,6 +54,8 @@ const Category = () => {
   const [editID, setEditID] = useState(null);
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [deleteID, setDeleteID] = useState(null);
+  const [files, setFiles] = useState([]);
+  const [previews, setPreviews] = useState([]);
 
   const fetchCategories = async (page = 1) => {
     setLoading(true); // Đặt trạng thái loading thành true
@@ -78,20 +75,28 @@ const Category = () => {
   }, []);
 
   const editCat = async (_id) => {
-    setOpen(true); // Mở dialog chỉnh sửa
-    setEditID(_id); // Cập nhật ID của danh mục đang chỉnh sửa
+    setOpen(true);
+    setEditID(_id);
     try {
       const res = await fetchDataFromApi(`/api/category/${_id}`);
       if (res) {
         setFormFields({
           name: res.name,
-          images: res.images.join(', '),
           color: res.color,
         });
+        // Set previews from existing images
+        setPreviews(res.images || []);
       }
     } catch (error) {
       console.error('Failed to fetch category data:', error);
     }
+  };
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormFields((prevFields) => ({
+      ...prevFields,
+      [name]: value,
+    }));
   };
 
   const handleClose = () => {
@@ -100,28 +105,49 @@ const Category = () => {
   };
 
   const editCategoryFun = async (event) => {
-    event.preventDefault(); // Ngăn chặn hành vi mặc định của form
-    setLoading(true); // Đặt trạng thái loading thành true
+    event.preventDefault();
+    setLoading(true);
+
     try {
-      const imagesArray = formFields.images.split(',').map((img) => img.trim());
-      await editData(`/api/category/${editID}`, {
-        name: formFields.name,
-        images: imagesArray,
-        color: formFields.color,
+      const formData = new FormData();
+      formData.append('name', formFields.name);
+      formData.append('color', formFields.color);
+
+      // Append existing images that weren't removed
+      previews.forEach((preview, index) => {
+        if (typeof preview === 'string' && preview.startsWith('http')) {
+          formData.append('existingImages', preview);
+        }
       });
-      fetchCategories(); // Tải lại danh sách danh mục sau khi chỉnh sửa
-      handleClose(); // Đóng dialog
+
+      // Append new files
+      files.forEach((file) => {
+        formData.append('images', file);
+      });
+
+      await editData(`/api/category/${editID}`, formData);
+
+      // Reset states and fetch updated data
+      setPreviews([]);
+      setFiles([]);
+      await fetchCategories();
+      handleClose();
+
+      context.setAlertBox({
+        error: false,
+        msg: 'Sửa thành công',
+        open: true,
+      });
     } catch (error) {
       console.error('Failed to edit category:', error);
+      context.setAlertBox({
+        error: true,
+        msg: 'Lỗi xảy ra khi chỉnh sửa danh mục',
+        open: true,
+      });
     } finally {
-      setLoading(false); // Đặt trạng thái loading thành false
-       context.setAlertBox({
-         error: false,
-         msg: 'Sửa thành công',
-         open: true,
-       });
+      setLoading(false);
     }
-   
   };
 
   const changeInput = (e) => {
@@ -169,6 +195,34 @@ const Category = () => {
     }
   };
 
+  const onChangeFile = (e) => {
+    if (e?.target?.files) {
+      const filesArray = Array.from(e.target.files);
+      setFiles(filesArray);
+
+      // Create preview URLs for new files
+      const newPreviews = filesArray.map((file) => URL.createObjectURL(file));
+      setPreviews((prevPreviews) => [...prevPreviews, ...newPreviews]);
+    }
+    
+  };
+ 
+  const removeFile = (index) => {
+    setPreviews((prevPreviews) => {
+      const newPreviews = [...prevPreviews];
+      newPreviews.splice(index, 1);
+      return newPreviews;
+    });
+
+    setFiles((prevFiles) => {
+      const newFiles = [...prevFiles];
+      newFiles.splice(index, 1);
+      return newFiles;
+    });
+  };
+  console.log(catData);
+  
+
   return (
     <>
       <div className="right-content w-100">
@@ -203,184 +257,43 @@ const Category = () => {
 
           {/* Table */}
           <div className="table-responsive w-100 mt-5">
-            <table className="table table-bordered v-align">
-              <thead className="thead-dark">
-                <tr>
-                  <th>UID</th>
-                  <th>IMAGE</th>
-                  <th>NAME CATEGORY</th>
-                  <th>COLOR</th>
-                  <th>ACTION</th>
-                </tr>
-              </thead>
-              <tbody>
-                {catData?.categoryList?.map((item, index) => (
-                  <tr key={item._id}>
-                    <td>#{index + 1}</td>
-                    <td>
-                      <div className="d-flex align-items-center productBox">
-                        <div className="imgWrapper">
-                          <div className="img">
-                            <img
-                              src={item.images[0]}
-                              alt={item.name}
-                              className="w-100"
-                            />
-                          </div>
-                        </div>
-                      </div>
-                    </td>
-                    <td>{item.name}</td>
-                    <td style={{ textAlign: 'center' }}>
-                      <div
-                        className="text-center"
-                        style={{
-                          backgroundColor: item.color,
-                          height: '50px',
-                          lineHeight: '50px',
-                        }}
-                      >
-                        {item.color}
-                      </div>
-                    </td>
-                    <td>
-                      <div className="actions d-flex align-items-center">
-                        <Button
-                          className="success"
-                          color="success"
-                          onClick={() => editCat(item._id)}
-                        >
-                          <FaPencilAlt />
-                        </Button>
-                        <Button
-                          className="error"
-                          color="error"
-                          onClick={() => handleOpenDeleteDialog(item._id)}
-                        >
-                          <MdDelete />
-                        </Button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            <CategoryTable
+              catData={catData}
+              editCat={editCat}
+              handleOpenDeleteDialog={handleOpenDeleteDialog}
+            />
 
             {/* Footer */}
             <div className="d-flex tableFooter">
-              <p>
-                Showing <b>{catData.categoryList?.length}</b> of{' '}
-                <b>{catData.totalPosts}</b> Results
-              </p>
-              {catData.totalPages > 0 && (
-                <Pagination
-                  count={catData.totalPages}
-                  page={catData.page}
-                  showFirstButton
-                  showLastButton
-                  onChange={handleChange}
-                  color="primary"
-                  className="pagination"
-                />
-              )}
+              <CategoryPagination
+                totalPages={catData.totalPages || 1}
+                currentPage={catData.currentPage || 1}
+                onChange={handleChange}
+              />
             </div>
           </div>
         </div>
-
-        {/* Delete Confirmation Dialog */}
-        <Dialog
+        <DeleteDialog
           open={openDeleteDialog}
-          onClose={handleCloseDeleteDialog}
-          className="edit-modal"
-        >
-          <DialogTitle>Xác nhận xóa</DialogTitle>
-          <DialogContent>
-            <DialogContentText className="text-center mt-4 mb-0">
-              Bạn có chắc chắn muốn xóa danh mục này không?
-            </DialogContentText>
-          </DialogContent>
-          <DialogActions>
-            <Button
-              onClick={handleCloseDeleteDialog}
-              style={{ fontSize: '1.6rem' }}
-              variant="outlined"
-            >
-              Hủy
-            </Button>
-            <Button
-              onClick={handleDeleteConfirm}
-              color="error"
-              className="btn-lg"
-              style={{ fontSize: '1.6rem', border: '1px solid red' }}
-            >
-              Xóa
-            </Button>
-          </DialogActions>
-        </Dialog>
+          onClose={() => setOpenDeleteDialog(false)}
+          onDelete={handleDeleteConfirm}
+        />
 
         {/* Edit Category Dialog */}
-        <Dialog
+
+        <EditCategoryDialog
           open={open}
-          onClose={handleClose}
-          className="edit-modal"
-          fullWidth
-          maxWidth="sm"
-        >
-          <DialogTitle>Chỉnh sửa danh mục</DialogTitle>
-          <DialogContent>
-            <DialogContentText>
-              Vui lòng nhập thông tin danh mục
-            </DialogContentText>
-            <form onSubmit={editCategoryFun}>
-              <TextField
-                autoFocus
-                margin="dense"
-                label="Tên danh mục"
-                type="text"
-                fullWidth
-                name="name"
-                value={formFields.name}
-                onChange={changeInput} // Cập nhật trạng thái khi nhập
-              />
-              <TextField
-                autoFocus
-                margin="dense"
-                label="Hình ảnh (dùng dấu phẩy để ngăn cách)"
-                type="text"
-                fullWidth
-                name="images"
-                value={formFields.images}
-                onChange={changeInput} // Cập nhật trạng thái khi nhập
-              />
-              <TextField
-                autoFocus
-                margin="dense"
-                label="Màu sắc"
-                type="text"
-                fullWidth
-                name="color"
-                value={formFields.color}
-                onChange={changeInput} // Cập nhật trạng thái khi nhập
-              />
-              <DialogActions>
-                <Button
-                  onClick={handleClose}
-                  variant="outlined"
-                  style={{ fontSize: '1.6rem' }}
-                >
-                  Hủy
-                </Button>
-                <Button
-                  type="submit"
-                  disabled={loading}
-                  className="btn-blue btn-lg"
-                >
-                  {loading ? 'Đang lưu...' : 'Lưu'}
-                </Button>
-              </DialogActions>
-            </form>
-          </DialogContent>
-        </Dialog>
+          formFields={formFields}
+          handleInputChange={handleInputChange}
+          changeInput={changeInput}
+          loading={loading}
+          bgColor={bgColor}
+          editCategoryFun={editCategoryFun}
+          handleClose={handleClose}
+          previews={previews}
+          onChangeFile={onChangeFile}
+          removeFile={removeFile}
+        />
 
         {/* Backdrop for loading */}
         <Backdrop

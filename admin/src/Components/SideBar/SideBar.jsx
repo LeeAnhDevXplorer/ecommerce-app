@@ -1,16 +1,9 @@
 import Button from '@mui/material/Button';
 import React, { useContext, useEffect, useState } from 'react';
 import { BiSolidDashboard } from 'react-icons/bi';
-import {
-  FaAngleRight,
-  FaBell,
-  FaCartArrowDown,
-  FaRegUserCircle,
-} from 'react-icons/fa';
+import { FaAngleRight } from 'react-icons/fa';
 import { FaProductHunt } from 'react-icons/fa6';
 import { HiOutlineLogout } from 'react-icons/hi';
-import { IoSettingsOutline } from 'react-icons/io5';
-import { RiMessengerFill } from 'react-icons/ri';
 import { Link } from 'react-router-dom';
 
 import { MyContext } from '../../App';
@@ -70,9 +63,9 @@ const SideBar = () => {
               <li>
                 <Link to={'/product/productlist'}>Danh sách sản phẩm</Link>
               </li>
-              {/* <li>
-                <Link to={'#'}>Xem sản phẩm</Link>
-              </li> */}
+              <li>
+                <Link to={'/product/producDetails'}>Xem sản phẩm</Link>
+              </li>
               <li>
                 <Link to={'/product/productupload'}>Tải lên sản phẩm</Link>
               </li>

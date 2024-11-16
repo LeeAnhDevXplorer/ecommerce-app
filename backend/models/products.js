@@ -9,12 +9,12 @@ const productSchema = mongoose.Schema({
     type: String,
     required: true,
   },
-   images: [
-      {
-        type: String,
-        required: true, // Each image URL must be a string
-      },
-    ],
+  images: [
+    {
+      type: String,
+      required: true, // Each image URL must be a string
+    },
+  ],
   brand: {
     type: String,
     required: true,
@@ -48,6 +48,14 @@ const productSchema = mongoose.Schema({
     type: Date,
     default: Date.now,
   },
+});
+
+productSchema.virtual('id').get(function () {
+  return this._id.toHexString();
+});
+
+productSchema.set('toJSON', {
+  virtuals: true,
 });
 
 export const Products = mongoose.model('Products', productSchema);

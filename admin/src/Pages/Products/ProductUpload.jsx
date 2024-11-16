@@ -7,14 +7,15 @@ import {
   Chip,
   CircularProgress,
   MenuItem,
-  Rating,
   Select,
 } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
+
 import { emphasize, styled } from '@mui/material/styles';
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import { TiDelete } from 'react-icons/ti';
 import { MyContext } from '../../App';
-import { fetchDataFromApi } from '../../utils/api';
+import { fetchDataFromApi, postData } from '../../utils/api';
 import './ProductUpload.css';
 
 const StyleBreadcrumb = styled(Chip)(({ theme }) => {
@@ -42,28 +43,28 @@ const ProductUpload = () => {
   const [catData, setCatData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [showCat, setShowCat] = useState('');
-  const [value, setValue] = useState(0);
-  const [showSubCat, setShowSubCat] = useState('');
-  const [isFeaturedVal, setisFeaturedVal] = useState('');
-  const [showRam, setShowRam] = useState('');
-  const [productImgArr, setProductImgArr] = useState([]);
+  const [isFeatured, setIsFeatured] = useState(false);
+  const navigate = useNavigate();
+  const [files, setFiles] = useState([]);
+  const [previews, setPreviews] = useState([]);
+
+  // Khởi tạo trạng thái form với các trường dữ liệu
   const [formFields, setFormFields] = useState({
     name: '',
     description: '',
     images: [],
     brand: '',
-    price: 0,
-    oldPrice: 0,
+    price: '',
+    oldPrice: '',
     category: '',
-    countInStock: 0,
-    rating: 0,
+    countInStock: '',
     isFeatured: false,
   });
-  const productImgs = useRef();
 
+  // Fetch danh mục sản phẩm khi component được render
   useEffect(() => {
     setLoading(true);
-    fetchDataFromApi(`/api/category`)
+    fetchDataFromApi('/api/category')
       .then((res) => {
         if (Array.isArray(res.categoryList)) {
           setCatData(res.categoryList);
@@ -72,73 +73,181 @@ const ProductUpload = () => {
         }
       })
       .catch((error) => {
-        console.error('Error fetching data:', error);
+        console.error('Error fetching categories:', error);
         setCatData([]);
       })
       .finally(() => {
         setLoading(false);
       });
   }, []);
-  const inputChange = (e) => {
-    setFormFields(() => ({
-      ...formFields,
-      [e.target.value]: e.target.value,
-    }));
-  };
+
   const handleInputChange = (e) => {
-    const { name, value } = e.target;
+    const { name, value, type, checked } = e.target;
     setFormFields((prev) => ({
       ...prev,
-      [name]: value,
+      [name]: type === 'checkbox' ? checked : value,
     }));
   };
 
-  const addProductImg = (e) => {
-    e.preventDefault(); // Ngăn chặn hành động mặc định của sự kiện (nếu cần)
+  const onChangeFile = (e) => {
+    const files = e.target.files;
+    if (files.length === 0) return;
 
-    const imageUrl = productImgs.current.value.trim(); // Lấy giá trị và loại bỏ khoảng trắng
-    if (imageUrl && !productImgArr.includes(imageUrl)) {
-      setProductImgArr((prevArr) => [...prevArr, imageUrl]);
-      setFormFields((prev) => ({
-        ...prev,
-        images: [...prev.images, imageUrl], // Cập nhật images trong formFields
-      }));
-    } else {
-      // Xử lý trường hợp giá trị không hợp lệ
-      console.warn('Invalid image URL or it already exists.');
-    }
+    // Update state to store the selected files
+    setFiles((prevFiles) => [...prevFiles, ...files]);
 
-    // Xóa giá trị input sau khi thêm
-    productImgs.current.value = '';
+    // Generate preview URLs for the selected files
+    const imgArr = Array.from(files).map((file) => URL.createObjectURL(file));
+
+    // Update the previews state with the generated image URLs
+    setPreviews((prevArr) => [...prevArr, ...imgArr]);
   };
 
-  // const handleImageUpload = (e) => {
-  //   const files = Array.from(e.target.files);
-  //   const imageUrls = files.map((file) => URL.createObjectURL(file));
-  //   setProductImgArr((prevArr) => [...prevArr, ...imageUrls]);
-  // };
+  const removeFile = (index) => {
+    setFiles((prevFiles) => prevFiles.filter((_, i) => i !== index));
+    setPreviews((prevPreviews) => prevPreviews.filter((_, i) => i !== index));
+  };
 
+  // Xử lý thay đổi danh mục
   const handleChangeCategory = (e) => {
     setShowCat(e.target.value);
-    setFormFields(() => ({
-      ...formFields,
+    setFormFields((prev) => ({
+      ...prev,
       category: e.target.value,
     }));
   };
 
-  const handleisFeaturedVal = (e) => {
-    setisFeaturedVal(e.target.value);
+  // Xử lý thay đổi giá trị "isFeatured"
+  const handleIsFeaturedChange = (e) => {
+    setIsFeatured(e.target.value);
     setFormFields(() => ({
       ...formFields,
       isFeatured: e.target.value,
     }));
   };
 
-  const addProduct = (event) => {
-    event.preventDefault();
-    formFields.images = productImgArr;
-    console.log(formFields);
-    // Handle submission logic here (e.g., API call)
+  const addProduct = async (event) => {
+    event.preventDefault(); // Prevent form submission
+
+    setLoading(true); // Start loading state
+
+    // Set a timeout to simulate a loading delay before showing the notification
+    setTimeout(async () => {
+      // Destructure the form fields for easy reference
+      const {
+        name,
+        price,
+        category,
+        images,
+        description,
+        brand,
+        oldPrice,
+        countInStock,
+        isFeatured,
+      } = formFields;
+
+      // Validate required fields
+      if (!name || !price || !category || files.length === 0) {
+        // Check if files are selected
+        setLoading(false);
+
+        context.setAlertBox({
+          open: true,
+          error: true,
+          msg: 'Vui lòng nhập toàn bộ, không được để trống!',
+        });
+        return;
+      }
+
+      // Validate price
+      const parsedPrice = parseFloat(price);
+      if (isNaN(parsedPrice) || parsedPrice <= 0) {
+        setLoading(false);
+        context.setAlertBox({
+          open: true,
+          error: true,
+          msg: 'Giá phải là số lớn hơn 0.',
+        });
+        return;
+      }
+
+      // Validate countInStock if provided
+      const parsedStock = parseInt(countInStock, 10);
+      if (countInStock && (isNaN(parsedStock) || parsedStock < 0)) {
+        setLoading(false);
+        context.setAlertBox({
+          open: true,
+          error: true,
+          msg: 'Số lượng trong kho phải là một số không âm.',
+        });
+        return;
+      }
+
+      // Create FormData and append only the provided fields
+      const fd = new FormData();
+      fd.append('name', name);
+      fd.append('price', parsedPrice);
+      fd.append('category', category);
+      if (description) fd.append('description', description);
+      if (brand) fd.append('brand', brand);
+      if (oldPrice) fd.append('oldPrice', oldPrice);
+      if (countInStock) fd.append('countInStock', parsedStock);
+      fd.append('isFeatured', isFeatured);
+
+      // Append images (from the files array)
+      files.forEach((file) => fd.append('images', file));
+      console.log(...fd);
+      try {
+        // API call to create product
+        await postData('/api/products/create', fd);
+
+        // On success, show a success message
+        context.setAlertBox({
+          open: true,
+          error: false,
+          msg: 'Bạn đã thêm sản phẩm thành công!',
+        });
+
+        setLoading(false); // End loading state
+
+        // Reset form fields and state
+        setFormFields({
+          name: '',
+          description: '',
+          images: [],
+          brand: '',
+          price: '',
+          oldPrice: '',
+          category: '',
+          countInStock: '',
+          isFeatured: false,
+        });
+        setFiles([]); // Reset file input
+        setPreviews([]); // Reset previews
+
+        // Navigate to the product list page
+        navigate('/product/productlist');
+      } catch (error) {
+        console.error('Error creating product:', error);
+        if (error.response && error.response.data) {
+          console.error('Server response:', error.response.data); // Log the response data for debugging
+          context.setAlertBox({
+            open: true,
+            error: true,
+            msg:
+              error.response.data.message ||
+              'Đã xảy ra lỗi khi tạo sản phẩm. Vui lòng thử lại.',
+          });
+        } else {
+          context.setAlertBox({
+            open: true,
+            error: true,
+            msg: 'Đã xảy ra lỗi không xác định. Vui lòng thử lại sau.',
+          });
+        }
+        setLoading(false); // End loading state on error
+      }
+    }, 1000); // Add delay of 1000ms before showing the notification
   };
 
   return (
@@ -162,12 +271,17 @@ const ProductUpload = () => {
       </div>
       <form onSubmit={addProduct} className="form">
         <div className="row">
-          <div className="col-md-9">
-            <div className="card mt-0 p4">
+          <div className="col-md-12">
+            <div className="card mt-0 p4 w-100">
               <h5 className="mb-4">Basic Information</h5>
               <div className="form-group mb-4">
                 <h6 className="mb-2">PRODUCT NAME</h6>
-                <input type="text" name="name" onChange={handleInputChange} />
+                <input
+                  type="text"
+                  name="name"
+                  value={formFields.name}
+                  onChange={handleInputChange}
+                />
               </div>
               <div className="form-group">
                 <h6>DESCRIPTION</h6>
@@ -176,6 +290,7 @@ const ProductUpload = () => {
                   cols="10"
                   name="description"
                   onChange={handleInputChange}
+                  value={formFields.description}
                 ></textarea>
               </div>
               <div className="row">
@@ -183,7 +298,7 @@ const ProductUpload = () => {
                   <div className="form-group">
                     <h6>CATEGORY</h6>
                     <Select
-                      value={showCat}
+                      value={formFields.category || ''} // Use an empty string as a fallback
                       onChange={handleChangeCategory}
                       displayEmpty
                       className="w-100"
@@ -199,11 +314,11 @@ const ProductUpload = () => {
                     </Select>
                   </div>
                 </div>
-                <div className="col">
+                {/* <div className="col">
                   <div className="form-group">
                     <h6>SUB CATEGORY</h6>
                     <Select
-                      value={showSubCat}
+                      value={formFields.setShowSubCat}
                       onChange={(e) => setShowSubCat(e.target.value)}
                       displayEmpty
                       className="w-100"
@@ -211,11 +326,11 @@ const ProductUpload = () => {
                       <MenuItem value="">
                         <em>None</em>
                       </MenuItem>
-                      <MenuItem value={10}>Jeans</MenuItem>
-                      <MenuItem value={20}>Shorts</MenuItem>
+                      <MenuItem>Jeans</MenuItem>
+                      <MenuItem>Shorts</MenuItem>
                     </Select>
                   </div>
-                </div>
+                </div> */}
                 <div className="col">
                   <div className="form-group">
                     <h6>OLD PRICE</h6>
@@ -223,6 +338,7 @@ const ProductUpload = () => {
                       type="text"
                       name="oldPrice"
                       onChange={handleInputChange}
+                      value={formFields.oldPrice}
                     />
                   </div>
                 </div>
@@ -235,6 +351,7 @@ const ProductUpload = () => {
                       type="text"
                       name="price"
                       onChange={handleInputChange}
+                      value={formFields.price}
                     />
                   </div>
                 </div>
@@ -242,14 +359,12 @@ const ProductUpload = () => {
                   <div className="form-group">
                     <h6>Is Featured</h6>
                     <Select
-                      value={isFeaturedVal}
-                      onChange={handleisFeaturedVal}
+                      value={formFields.isFeatured || false}
+                      onChange={handleIsFeaturedChange}
+                      name="isFeatured" // Include name to capture in handleInputChange
                       displayEmpty
                       className="w-100"
                     >
-                      <MenuItem value="">
-                        <em>None</em>
-                      </MenuItem>
                       <MenuItem value={false}>False</MenuItem>
                       <MenuItem value={true}>True</MenuItem>
                     </Select>
@@ -262,6 +377,7 @@ const ProductUpload = () => {
                       type="text"
                       name="countInStock"
                       onChange={handleInputChange}
+                      value={formFields.countInStock}
                     />
                   </div>
                 </div>
@@ -275,14 +391,15 @@ const ProductUpload = () => {
                       type="text"
                       name="brand"
                       onChange={handleInputChange}
+                      value={formFields.brand}
                     />
                   </div>
                 </div>
-                <div className="col">
+                {/* <div className="col">
                   <div className="form-group">
                     <h6>PRODUCT RAM</h6>
                     <Select
-                      value={showRam}
+                      value={formFields.showRam}
                       onChange={(e) => setShowRam(e.target.value)}
                       displayEmpty
                       className="w-100"
@@ -290,36 +407,16 @@ const ProductUpload = () => {
                       <MenuItem value="">
                         <em>None</em>
                       </MenuItem>
-                      <MenuItem value={10}>4GB</MenuItem>
-                      <MenuItem value={20}>8GB</MenuItem>
-                      <MenuItem value={30}>12GB</MenuItem>
+                      <MenuItem>4GB</MenuItem>
+                      <MenuItem>8GB</MenuItem>
+                      <MenuItem>12GB</MenuItem>
                     </Select>
                   </div>
-                </div>
-              </div>
-
-              <div className="row">
-                <div className="col-md-4">
-                  <div className="form-group">
-                    <h6>RATINGS</h6>
-                    <Rating
-                      className="star_icon"
-                      name="simple-controlled"
-                      value={value}
-                      onChange={(e, newValue) => {
-                        setValue(newValue);
-                        setFormFields(() => ({
-                          ...formFields,
-                          rating: newValue,
-                        }));
-                      }}
-                    />
-                  </div>
-                </div>
+                </div> */}
               </div>
             </div>
           </div>
-          <div className="col-md-3">
+          {/* <div className="col-md-3">
             <div className="stickyBox">
               <h4>Product Images</h4>
               <div className="imgGrid d-flex">
@@ -331,10 +428,10 @@ const ProductUpload = () => {
                   ))}
               </div>
             </div>
-          </div>
+          </div> */}
         </div>
 
-        <div className="row">
+        {/* <div className="row">
           <div className="col">
             <div className="form-group">
               <h6>product Image</h6>
@@ -351,32 +448,38 @@ const ProductUpload = () => {
               </div>
             </div>
           </div>
-        </div>
+        </div> */}
 
         <div className="card p-4 mt-0 w-100">
           <div className="imagesUploadSec">
             <h5 className="mb-4">Media And Published</h5>
             <div className="imgUploadBox d-flex align-items-center">
+              {previews.length !== 0 &&
+                previews.map((item, index) => (
+                  <div className="uploadBox d-flex" key={index}>
+                    <span onClick={() => removeFile(index)} className="remove">
+                      <TiDelete />
+                    </span>
+                    <div className="box">
+                      <span
+                        className="lazy-load-image-background blur lazy-load-image-loaded"
+                        style={{
+                          color: 'transparent',
+                          display: 'inline-block',
+                        }}
+                      >
+                        <img alt="image" className="w-100 h-100" src={item} />
+                      </span>
+                    </div>
+                  </div>
+                ))}
               <div className="uploadBox">
-                <span className="remove">
-                  <TiDelete />
-                </span>
-                <div className="box">
-                  <span
-                    className="lazy-load-image-background blur lazy-load-image-loaded"
-                    style={{ color: 'transparent', display: 'inline-block' }}
-                  >
-                    <img
-                      alt="image"
-                      className="w-100"
-                      src="https://mironcoder-hotash.netlify.app/images/product/single/01.webp"
-                    />
-                  </span>
-                </div>
-              </div>
-
-              <div className="uploadBox">
-                <input type="file" multiple="" name="images" />
+                <input
+                  type="file"
+                  multiple
+                  onChange={(e) => onChangeFile(e, '/api/products/upload')}
+                  name="images"
+                />
                 <div className="info">
                   <svg
                     stroke="currentColor"
