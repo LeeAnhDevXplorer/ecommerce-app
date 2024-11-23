@@ -46,8 +46,8 @@
 }
 
 .imgUploadBox {
-  flex-wrap: wrap;
-  gap: 10px;
+  flex-wrap: wrap !important;
+  gap: 8px;
   width: 100%;
 }
 

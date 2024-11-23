@@ -6,7 +6,8 @@ import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
 import { bgColor, menu_list } from "../../assets/assets";
-const HomeCat = () => {
+const HomeCat = ({catData}) => {
+  
   const [itemBg, setItemBg] = useState(bgColor);
   return (
     <section className="homeCat">
@@ -20,14 +21,15 @@ const HomeCat = () => {
           modules={[Navigation]}
           className="mySwiper"
         >
-          {menu_list.map((item, index) => {
+          {catData?.categoryList?.map((item, index) => {
             return (
               <SwiperSlide key={index}>
                 <div
                   className="item text-center"
-                  style={{ backgroundColor: itemBg[index] }}
+                  style={{ backgroundColor: item.color }}
                 >
-                  <img src={item.menu_image} alt="" />
+                  <img src={item.images[0]} alt="" />
+                  <h6 style={{fontSize: "1.6rem", marginTop: "10px"}}>{item.name}</h6>
                 </div>
               </SwiperSlide>
             );

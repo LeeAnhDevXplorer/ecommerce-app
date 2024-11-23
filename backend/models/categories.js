@@ -5,7 +5,6 @@ const categoriesSchema = new mongoose.Schema(
     name: {
       type: String,
       required: true,
-      unique: true, // Ensure category names are unique
     },
     images: [
       {
@@ -16,10 +15,11 @@ const categoriesSchema = new mongoose.Schema(
     color: {
       type: String,
       required: true,
-    },
+    }
   },
   { timestamps: true }
 ); // Adds createdAt and updatedAt automatically
+
 
 categoriesSchema.virtual('id').get(function () {
   return this._id.toHexString();

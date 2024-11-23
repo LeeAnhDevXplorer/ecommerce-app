@@ -1,27 +1,50 @@
-import React from "react";
-import Button from "@mui/material/Button";
+import Button from '@mui/material/Button';
+import React, { useEffect, useState } from 'react';
 // Import Swiper React components
-import { Swiper, SwiperSlide } from "swiper/react";
+import { Swiper, SwiperSlide } from 'swiper/react';
 // import required modules
-import { Navigation } from "swiper/modules";
+import { Navigation } from 'swiper/modules';
 
 // Import Swiper styles
-import "swiper/css";
-import "swiper/css/navigation";
-import "swiper/css/pagination";
-import "./Home.css";
-import HomeBanner from "../../Components/HomeBanner/HomeBanner";
-import { assets } from "../../assets/assets";
-import { FaArrowRight } from "react-icons/fa";
-import ProductItem from "../../Components/ProductItem/ProductItem";
-import HomeCat from "../../Components/HomeCat/HomeCat";
+import { FaArrowRight } from 'react-icons/fa';
+import 'swiper/css';
+import 'swiper/css/navigation';
+import 'swiper/css/pagination';
+import HomeBanner from '../../Components/HomeBanner/HomeBanner';
+import HomeCat from '../../Components/HomeCat/HomeCat';
+import ProductItem from '../../Components/ProductItem/ProductItem';
+import { assets } from '../../assets/assets';
+import './Home.css';
 
-import { IoMailOutline } from "react-icons/io5";
+import { IoMailOutline } from 'react-icons/io5';
+import { fetchDataFromApi } from '../../utils/api';
 const Home = () => {
+  const [catData, setCatData] = useState([]);
+  const [subCatData, setSubCatData] = useState([]);
+  const [featuredProducts, setfeaturedProducuts] = useState([]);
+  const [productsData, setProducutsData] = useState([]);
+  useEffect(() => {
+    fetchDataFromApi('/api/category').then((res) => {
+      setCatData(res);
+    });
+    fetchDataFromApi('/api/subCategory').then((res) => {
+      setSubCatData(res);
+    });
+    fetchDataFromApi(`/api/products/featured`).then((res) => {
+      setfeaturedProducuts(res);
+    });
+
+    fetchDataFromApi(`/api/products`).then((res) => {
+      setProducutsData(res);
+    });
+  }, []);
   return (
     <div>
       <HomeBanner />
-      <HomeCat />
+      {catData?.length !== 0 && (
+        <HomeCat catData={catData} subCatData={subCatData} />
+      )}
+
       <section className="homeProducts">
         <div className="container">
           <div className="row">
@@ -67,36 +90,14 @@ const Home = () => {
                   modules={[Navigation]}
                   className="mySwiper"
                 >
-                  <SwiperSlide className="mr-2">
-                    <ProductItem />
-                  </SwiperSlide>
-                  <SwiperSlide className="mr-2">
-                    <ProductItem />
-                  </SwiperSlide>
-                  <SwiperSlide className="mr-2">
-                    <ProductItem />
-                  </SwiperSlide>
-                  <SwiperSlide className="mr-2">
-                    <ProductItem />
-                  </SwiperSlide>
-                  <SwiperSlide className="mr-2">
-                    <ProductItem />
-                  </SwiperSlide>
-                  <SwiperSlide className="mr-2">
-                    <ProductItem />
-                  </SwiperSlide>
-                  <SwiperSlide className="mr-2">
-                    <ProductItem />
-                  </SwiperSlide>
-                  <SwiperSlide className="mr-2">
-                    <ProductItem />
-                  </SwiperSlide>
-                  <SwiperSlide className="mr-2">
-                    <ProductItem />
-                  </SwiperSlide>
-                  <SwiperSlide className="mr-2">
-                    <ProductItem />
-                  </SwiperSlide>
+                  {featuredProducts?.length !== 0 &&
+                    featuredProducts?.map((item, index) => {
+                      return (
+                        <SwiperSlide className="mr-2" key={index}>
+                          <ProductItem item={item} />
+                        </SwiperSlide>
+                      );
+                    })}
                 </Swiper>
               </div>
 
@@ -112,15 +113,12 @@ const Home = () => {
                 </Button>
               </div>
               <div className="product-row productRow2 mt-4 w-100 d-flex">
-                <ProductItem />
-                <ProductItem />
-                <ProductItem />
-                <ProductItem />
-                <ProductItem />
-                <ProductItem />
-                <ProductItem />
-                <ProductItem />
-                <ProductItem />
+                {productsData?.data?.length !== 0 &&
+                  productsData?.data?.map((item, index) => {
+                    return (
+                        <ProductItem key={index} item={item} />
+                    );
+                  })}
               </div>
               <div className="d-flex mt-4 mb-5 bannerSec">
                 <div className="banner">
@@ -150,7 +148,7 @@ const Home = () => {
 
               <form>
                 <IoMailOutline />
-                <input type="text" placeholder="Your Email Address"/>
+                <input type="text" placeholder="Your Email Address" />
                 <Button>Subscribe</Button>
               </form>
             </div>

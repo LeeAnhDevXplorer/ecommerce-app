@@ -69,6 +69,9 @@ const SideBar = () => {
               <li>
                 <Link to={'/product/productupload'}>Tải lên sản phẩm</Link>
               </li>
+              <li>
+                <Link to={'/product/productrams'}>Tải lên Ram</Link>
+              </li>
             </ul>
           </div>
         </li>
@@ -94,11 +97,14 @@ const SideBar = () => {
               <li>
                 <Link to={'/category/categorylist'}>Danh mục sản phẩm</Link>
               </li>
-              {/* <li>
-                <Link to={'#'}>Xem sản phẩm</Link>
-              </li> */}
+              <li>
+                <Link to={'/category/subcategory'}>Danh sách Danh mục con</Link>
+              </li>
               <li>
                 <Link to={'/category/categoryadd'}>Tải lên Danh mục</Link>
+              </li>
+              <li>
+                <Link to={'/category/addsubcat'}>Tải lên Danh mục con</Link>
               </li>
             </ul>
           </div>

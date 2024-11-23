@@ -11,7 +11,7 @@ const ProductsTable = ({
   context,
   handleEditP,
   handleOpenDeleteDialog,
-  isHomePage,
+  isHomePage, 
 }) => {
   return (
     <div className="table-responsive w-100 mt-5">
@@ -21,6 +21,7 @@ const ProductsTable = ({
             <th>UID</th>
             <th>PRODUCT</th>
             <th>CATEGORY</th>
+            <th>SUB CATEGORY</th>
             <th>BRAND</th>
             <th>PRICE</th>
             <th>STOCK</th>
@@ -31,6 +32,7 @@ const ProductsTable = ({
         <tbody>
           {productList?.length > 0 ? (
             productList?.map((item, index) => {
+                const formattedPrice = parseFloat(item.price).toFixed(3);
               return (
                 <tr key={item._id || index}>
                   <td>#{index + 1}</td>
@@ -55,10 +57,11 @@ const ProductsTable = ({
                     </div>
                   </td>
                   <td>{item.category.name}</td>
+                  <td>{item.subCat.subCat}</td>
                   <td>{item.brand}</td>
                   <td>
                     <del className="old tex">{item.oldPrice}</del>
-                    <span className="new text-danger">{item.price}</span>
+                    <span className="new text-danger">{formattedPrice}</span>
                   </td>
                   <td>{item.countInStock}</td>
                   <td>{item.rating}</td>

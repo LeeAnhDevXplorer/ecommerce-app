@@ -46,7 +46,9 @@ const EditCategoryDialog = ({
             Chỉnh sửa danh mục
           </DialogTitle>
           <DialogContent>
-            <DialogContentText>
+            <DialogContentText
+              style={{ fontSize: '1.6rem', marginBottom: '10px' }}
+            >
               Vui lòng nhập thông tin danh mục
             </DialogContentText>
 
@@ -111,7 +113,7 @@ const EditCategoryDialog = ({
                       ))}
                     </Select>
                   </FormControl>
-
+                  
                   <ImageUpload
                     previews={previews}
                     onChangeFile={onChangeFile}

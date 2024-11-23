@@ -48,7 +48,7 @@ const uploadImages = async (images) => {
       )
     )
   );
-  return uploadStatus;
+  return uploadStatus; 
 };
 
 // Route to upload images locally, then upload to Cloudinary
@@ -78,7 +78,7 @@ router.get('/', async (req, res) => {
     return res.status(200).json({
       categoryList: categoryList,
       totalPages: totalPages,
-      page: page,
+      page: page, 
     });
   } catch (error) {
     res.status(500).json({ success: false });
@@ -200,88 +200,170 @@ router.delete('/:id', async (req, res) => {
   }
 });
 
+// router.put('/:id', upload.array('images'), async (req, res) => {
+//   try {
+//     const limit = pLimit(2); // Limit concurrent requests
+//     const categoryId = req.params.id;
+
+//     // Retrieve the existing category
+//     const existingCategory = await Category.findById(categoryId);
+//     if (!existingCategory) {
+//       return res.status(404).json({
+//         message: 'Category not found',
+//         success: false,
+//       });
+//     }
+
+//     // Separate the images into new uploads and retained images
+//     const newImages = req.files || []; // New uploaded images from form-data
+//     const retainedImages = req.body.retainedImages || []; // Images user wants to keep (defaults to an empty array if not provided)
+
+//     // Filter out images that need to be deleted
+//     const imagesToDelete = existingCategory.images.filter(
+//       (img) => !retainedImages.includes(img)
+//     );
+
+//     // Delete images that are not retained from Cloudinary
+//     // const deletionPromises = imagesToDelete.map((image) =>
+//     //   limit(() => {
+//     //     const publicId = image.publicId || image.split('/').pop().split('.')[0];
+//     //     return cloudinary.uploader.destroy(publicId).catch((error) => {
+//     //       console.error('Error deleting image from Cloudinary:', error.message);
+//     //       return null;
+//     //     });
+//     //   })
+//     // );
+//     // await Promise.all(deletionPromises);
+
+//     // Upload new images to Cloudinary
+//     const uploadResults = await Promise.all(
+//       newImages.map((image) =>
+//         limit(() =>
+//           cloudinary.uploader.upload(image.path).then((result) => {
+//             fs.unlinkSync(image.path); // Delete local file after uploading
+//             return result.url; // Return only the URL to save in the database
+//           })
+//         )
+//       )
+//     );
+
+//     // Combine retained images and newly uploaded images
+//     const updatedImages = [...retainedImages, ...uploadResults];
+
+//     // Update the category in the database
+//     const updatedCategory = await Category.findByIdAndUpdate(
+//       categoryId,
+//       {
+//         name: req.body.name,
+//         images: updatedImages,
+//         color: req.body.color,
+//       },
+//       { new: true }
+//     );
+
+//     if (!updatedCategory) {
+//       return res.status(500).json({
+//         message: 'Unable to update the category',
+//         success: false,
+//       });
+//     }
+
+//     // Respond with the updated category
+//     return res.status(200).json({
+//       message: 'Category updated successfully',
+//       category: updatedCategory,
+//       success: true,
+//     });
+//   } catch (error) {
+//     console.error('Error updating category:', error.message);
+//     return res.status(500).json({
+//       message: 'An error occurred while updating the category',
+//       success: false,
+//       error: error.message,
+//     });
+//   }
+// }); 
+
 router.put('/:id', upload.array('images'), async (req, res) => {
   try {
-    const limit = pLimit(2); // Limit concurrent requests
+    const limit = pLimit(2); // Giới hạn số lượng yêu cầu song song
     const categoryId = req.params.id;
 
-    // Retrieve the existing category
+    // Lấy danh mục hiện tại từ cơ sở dữ liệu
     const existingCategory = await Category.findById(categoryId);
     if (!existingCategory) {
       return res.status(404).json({
-        message: 'Category not found',
+        message: 'Không tìm thấy danh mục',
         success: false,
       });
     }
 
-    // Separate the images into new uploads and retained images
-    const newImages = req.files || []; // New uploaded images from form-data
-    const retainedImages = req.body.retainedImages || []; // Images user wants to keep (defaults to an empty array if not provided)
+    const newImages = req.files || []; // Ảnh mới tải lên từ form-data
 
-    // Filter out images that need to be deleted
-    const imagesToDelete = existingCategory.images.filter(
-      (img) => !retainedImages.includes(img)
-    );
+    if (newImages.length === 0) {
+      // Nếu không có ảnh mới, xóa toàn bộ ảnh cũ trên Cloudinary
+      const deletionPromises = existingCategory.images.map((image) =>
+        limit(() => {
+          const publicId = image.split('/').pop().split('.')[0]; // Lấy public_id từ URL
+          return cloudinary.uploader.destroy(publicId).catch((error) => {
+            console.error('Lỗi khi xóa ảnh trên Cloudinary:', error.message);
+            return null; // Tiếp tục ngay cả khi lỗi xảy ra
+          });
+        })
+      );
+      await Promise.all(deletionPromises);
 
-    // Delete images that are not retained from Cloudinary
-    // const deletionPromises = imagesToDelete.map((image) =>
-    //   limit(() => {
-    //     const publicId = image.publicId || image.split('/').pop().split('.')[0];
-    //     return cloudinary.uploader.destroy(publicId).catch((error) => {
-    //       console.error('Error deleting image from Cloudinary:', error.message);
-    //       return null;
-    //     });
-    //   })
-    // );
-    // await Promise.all(deletionPromises);
+      // Xóa danh sách ảnh trong database
+      existingCategory.images = [];
+    } else {
+      // Nếu có ảnh mới, xóa toàn bộ ảnh cũ và thêm ảnh mới
+      const deletionPromises = existingCategory.images.map((image) =>
+        limit(() => {
+          const publicId = image.split('/').pop().split('.')[0]; // Lấy public_id từ URL
+          return cloudinary.uploader.destroy(publicId).catch((error) => {
+            console.error('Lỗi khi xóa ảnh trên Cloudinary:', error.message);
+            return null; // Tiếp tục ngay cả khi lỗi xảy ra
+          });
+        })
+      );
+      await Promise.all(deletionPromises);
 
-    // Upload new images to Cloudinary
-    const uploadResults = await Promise.all(
-      newImages.map((image) =>
-        limit(() =>
-          cloudinary.uploader.upload(image.path).then((result) => {
-            fs.unlinkSync(image.path); // Delete local file after uploading
-            return result.url; // Return only the URL to save in the database
-          })
+      // Upload ảnh mới lên Cloudinary
+      const uploadResults = await Promise.all(
+        newImages.map((image) =>
+          limit(() =>
+            cloudinary.uploader.upload(image.path).then((result) => {
+              fs.unlinkSync(image.path); // Xóa file cục bộ sau khi upload
+              return result.url; // Lấy URL để lưu vào cơ sở dữ liệu
+            })
+          )
         )
-      )
-    );
+      );
 
-    // Combine retained images and newly uploaded images
-    const updatedImages = [...retainedImages, ...uploadResults];
-
-    // Update the category in the database
-    const updatedCategory = await Category.findByIdAndUpdate(
-      categoryId,
-      {
-        name: req.body.name,
-        images: updatedImages,
-        color: req.body.color,
-      },
-      { new: true }
-    );
-
-    if (!updatedCategory) {
-      return res.status(500).json({
-        message: 'Unable to update the category',
-        success: false,
-      });
+      // Cập nhật danh sách ảnh trong database
+      existingCategory.images = uploadResults;
     }
 
-    // Respond with the updated category
+    // Cập nhật các trường khác của danh mục
+    existingCategory.name = req.body.name;
+    existingCategory.color = req.body.color;
+
+    const updatedCategory = await existingCategory.save();
+
     return res.status(200).json({
-      message: 'Category updated successfully',
+      message: 'Cập nhật danh mục thành công',
       category: updatedCategory,
       success: true,
     });
   } catch (error) {
-    console.error('Error updating category:', error.message);
+    console.error('Lỗi khi cập nhật danh mục:', error.message);
     return res.status(500).json({
-      message: 'An error occurred while updating the category',
+      message: 'Đã xảy ra lỗi trong quá trình cập nhật danh mục',
       success: false,
       error: error.message,
     });
   }
 });
+
 
 export default router;

@@ -4,19 +4,25 @@ import 'dotenv/config';
 import express from 'express';
 import { connectDB } from './config/db.js';
 import categoryRouter from './controllersRouter/categories.js'; // Adjust the path as needed
-import productRoter from './controllersRouter/products.js';
-
+import pRamRouter from './controllersRouter/productRams.js';
+import productRouter from './controllersRouter/products.js';
+import psizeRouter from './controllersRouter/productSize.js';
+import pWeightRouter from './controllersRouter/productWeigth.js';
+import subCatRouter from './controllersRouter/subCategory.js';
 const app = express();
+app.use(express.json());
 
 app.use(cors());
 app.options('*', cors());
-// app.use(bodyParser.json());
-app.use(express.json());
 
 // Router
-app.use("/uploads", express.static("uploads"))
+app.use('/uploads', express.static('uploads'));
 app.use('/api/category', categoryRouter);
-app.use('/api/products', productRoter);
+app.use('/api/subcategory', subCatRouter);
+app.use('/api/products', productRouter);
+app.use('/api/weight', pWeightRouter);
+app.use('/api/prams', pRamRouter);
+app.use('/api/psize', psizeRouter);
 
 // Connect to MongoDB
 connectDB();

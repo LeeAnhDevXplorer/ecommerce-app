@@ -27,7 +27,6 @@ const App = () => {
   const getCountry = async (url) => {
     const responsive = await axios.get(url).then((res) => {
       setCountruList(res.data.data);
-      console.log(res.data.data);
     });
   };
   const values = {

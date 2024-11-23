@@ -193,3 +193,24 @@ body.dark .maincontainer .card-body h4 {
 .css-113d811-MuiFormLabel-root-MuiInputLabel-root {
   background-color: #fff;
 }
+
+header.MuiPaper-root.MuiPaper-elevation.MuiPaper-elevation4.MuiAppBar-root.MuiAppBar-colorPrimary.MuiAppBar-positionFixed.mui-fixed.css-2b0eok-MuiPaper-root-MuiAppBar-root {
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: sticky;
+  top: 0;
+}
+
+.MuiSelect-select.MuiSelect-outlined.MuiInputBase-input.MuiOutlinedInput-input.css-w76bbz-MuiSelect-select-MuiInputBase-input-MuiOutlinedInput-input {
+  border: none !important;
+}
+
+.css-19qnlrw-MuiFormLabel-root-MuiInputLabel-root {
+  font-size: 1.6rem !important;
+}
+
+span.MuiChip-label.MuiChip-labelMedium.css-1dybbl5-MuiChip-label {
+  font-size: 1.4rem !important;
+}

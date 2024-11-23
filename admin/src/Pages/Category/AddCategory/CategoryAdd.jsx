@@ -1,13 +1,14 @@
 import { Backdrop, Button, CircularProgress } from '@mui/material';
 import React, { useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { MyContext } from '../../App';
-import { bgColor } from '../../assets/assets';
-import ImageUpload from '../../Components/ImageUpload/ImageUpload';
-import { postData } from '../../utils/api';
+import { MyContext } from '../../../App';
+import { bgColor } from '../../../assets/assets';
+import { postData } from '../../../utils/api';
 import './CategoryAdd.css';
-import BreadcrumbsNav from './Components/BreadcrumbsNav/BreadcrumbsNav';
-import CategoryForm from './Components/CategoryForm/CategoryForm';
+import BreadcrumbsNav from '../Components/BreadcrumbsNav/BreadcrumbsNav';
+import CategoryForm from '../Components/CategoryForm/CategoryForm';
+import ImageUpload from '../../../Components/ImageUpload/ImageUpload';
+
 
 const CategoryAdd = () => {
   const context = useContext(MyContext);
@@ -55,54 +56,60 @@ const CategoryAdd = () => {
     setPreviews((prevArr) => [...prevArr, ...imgArr]);
   };
 
-const handleSubmit = async (e) => {
-  e.preventDefault();
-  setLoading(true);
-  if (!validateForm()) {
-    setLoading(false);
-    return;
-  }
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    if (!validateForm()) {
+      setLoading(false);
+      return;
+    }
 
-  const fd = new FormData();
-  fd.append('name', formFields.name);
-  fd.append('color', formFields.color);
-  files.forEach((file) => fd.append('images', file));
+    const fd = new FormData();
+    fd.append('name', formFields.name);
+    fd.append('color', formFields.color);
+    files.forEach((file) => fd.append('images', file));
 
-  // Log the FormData to inspect it
-  console.log(...fd);
+    // Log the FormData to inspect it
+    console.log(...fd);
 
-  try {
-    const res = await postData('/api/category/create', fd);
-    setLoading(false);
-    if (res.success) {
-      navigate('/category/categorylist');
-      context.setAlertBox({
-        open: true,
-        error: false,
-        msg: 'Category created successfully!',
-      });
-    } else {
+    try {
+      const res = await postData('/api/category/create', fd);
+      setLoading(false);
+      if (res.success) {
+        navigate('/category/categorylist');
+        context.setAlertBox({
+          open: true,
+          error: false,
+          msg: 'Category created successfully!',
+        });
+      } else {
+        context.setAlertBox({
+          open: true,
+          error: true,
+          msg: res.message || 'An error occurred.',
+        });
+      }
+    } catch (error) {
+      console.error('Request failed:', error); // Log any errors for further debugging
+      setLoading(false);
       context.setAlertBox({
         open: true,
         error: true,
-        msg: res.message || 'An error occurred.',
+        msg: 'An error occurred during submission.',
       });
     }
-  } catch (error) {
-    console.error('Request failed:', error); // Log any errors for further debugging
-    setLoading(false);
-    context.setAlertBox({
-      open: true,
-      error: true,
-      msg: 'An error occurred during submission.',
-    });
-  }
-};
-
+  };
 
   return (
     <div className="right-content w-100">
-      <div className="card shadow border-0 w-100 flex-row p-4">
+      <div
+        className="card shadow border-0 w-100 flex-row p-4"
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+        }}
+      >
         <h5 className="mb-0">Add Product Category</h5>
         <BreadcrumbsNav />
       </div>
@@ -115,11 +122,12 @@ const handleSubmit = async (e) => {
                 handleInputChange={handleInputChange}
                 formErrors={formErrors}
                 bgColor={bgColor}
+                isShowCatPage={false}
               />
             </div>
           </div>
         </div>
-        <div className="card p-4 mt-0 w-100"> 
+        <div className="card p-4 mt-0 w-100">
           <ImageUpload previews={previews} onChangeFile={onChangeFile} />
           <Button
             type="submit"

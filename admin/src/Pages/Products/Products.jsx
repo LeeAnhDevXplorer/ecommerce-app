@@ -1,7 +1,13 @@
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import HomeIcon from '@mui/icons-material/Home';
-import { Breadcrumbs, Chip, MenuItem, Pagination, Select } from '@mui/material';
-import Slide from '@mui/material/Slide';
+import {
+  Breadcrumbs,
+  Chip,
+  CircularProgress,
+  MenuItem,
+  Pagination,
+  Select,
+} from '@mui/material';
 import React, { useContext, useEffect, useState } from 'react';
 import { deleteData, editData, fetchDataFromApi } from '../../utils/api';
 import './Products.css';
@@ -15,9 +21,7 @@ import ProductsTable from './Components/ProductsTable/ProductsTable';
 const Products = () => {
   const [open, setOpen] = useState(false);
   const [showBy, setShowBy] = useState('');
-  const [showCat, setShowCat] = useState('');
-  const [showBrand, setshowBrand] = useState('');
-  const [showSearch, setshowSearch] = useState('');
+  const [catData, setCatData] = useState([]);
   const [productList, setProductList] = useState([]);
   const [loading, setLoading] = useState(false);
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
@@ -37,9 +41,53 @@ const Products = () => {
     price: '',
     oldPrice: '',
     category: '',
+    subCat: '',
     countInStock: '',
     isFeatured: false,
   });
+
+  useEffect(() => {
+    setLoading(true);
+    fetchDataFromApi('/api/category')
+      .then((res) => {
+        if (Array.isArray(res.categoryList)) {
+          setCatData(res.categoryList);
+        } else {
+          setCatData([]);
+        }
+      })
+      .catch((error) => {
+        console.error('Error fetching categories:', error);
+        setCatData([]);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }, []);
+
+  const fetchCategories = async (page = 1) => {
+    setLoading(true); // Đặt trạng thái loading thành true
+    try {
+      const response = await fetchDataFromApi(`/api/subCategory`);
+      setsubCatData(response); // Cập nhật trạng thái catData với dữ liệu nhận được
+    } catch (error) {
+      console.error('Failed to fetch categories:', error);
+    } finally { 
+      setLoading(false); // Đặt trạng thái loading thành false
+    }
+  };
+
+    useEffect(() => {
+      context.setProgress(30);
+      fetchCategories(context.setProgress(100)); // Gọi hàm để tải danh mục khi component được mount
+    }, []);
+
+  const handleSelectChange = (e, fieldName) => {
+    setFormFields((prev) => ({
+      ...prev,
+      [fieldName]: e.target.value,
+    }));
+  };
 
   const fetchProducts = async (page = 1) => {
     setLoading(true);
@@ -73,6 +121,7 @@ const Products = () => {
     setOpenDeleteDialog(false); // Đóng dialog xóa
     setDeleteID(null); // Đặt lại ID xóa
   };
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormFields((prevFields) => ({
@@ -85,6 +134,7 @@ const Products = () => {
     setDeleteID(_id); // Cập nhật ID của danh mục đang xóa
     setOpenDeleteDialog(true); // Mở dialog xóa
   };
+
   const changeInput = (e) => {
     setFormFields((prevFields) => ({
       ...prevFields,
@@ -96,6 +146,7 @@ const Products = () => {
     setCurrentPage(value); // Update the current page
     fetchProducts(value); // Fetch products for the selected page
   };
+
   const handleClose = () => {
     setOpen(false); // Đóng dialog
   };
@@ -115,6 +166,11 @@ const Products = () => {
           price: res.price || '',
           oldPrice: res.oldPrice || '',
           category: res.category ? res.category.name : '',
+          // subCat:
+          //   res.category && typeof res.category === 'object'
+          //     ? res.category.subCat || ''
+          //     : '',
+          subCat: res.subCat || '',
           countInStock: res.countInStock || '',
           isFeatured: res.isFeatured || false,
         });
@@ -130,94 +186,148 @@ const Products = () => {
 
   const editPFun = async (e) => {
     e.preventDefault();
-    console.log('Edit function triggered');
     setLoading(true);
+    context.setProgress(30);
 
     try {
-      console.log('Sending edit request for product:', EditP);
-      console.log('Form fields before submission:', formFields);
-
       const formData = new FormData();
-      formData.append('name', formFields.name);
-      formData.append('description', formFields.description);
-      formData.append('brand', formFields.brand);
-      formData.append('price', formFields.price);
-      formData.append('oldPrice', formFields.oldPrice);
-      formData.append('category', formFields.category);
-      formData.append('countInStock', formFields.countInStock);
-      formData.append('isFeatured', formFields.isFeatured);
 
-      // Add existing images (URLs)
-      console.log('Existing images (previews):', previews);
-      previews.forEach((preview) => {
-        if (typeof preview === 'string' && preview.startsWith('http')) {
-          console.log('Adding existing image to formData:', preview);
-          formData.append('existingImages', preview);
-        }
+      // Kiểm tra và chuyển đổi giá trị trước khi append
+      formData.append('name', formFields.name?.trim() || '');
+      formData.append('description', formFields.description?.trim() || '');
+      formData.append('brand', formFields.brand?.trim() || '');
+      formData.append('price', Number(formFields.price) || 0);
+      formData.append('oldPrice', Number(formFields.oldPrice) || 0);
+      formData.append('category', formFields.category?.trim() || '');
+      formData.append(
+        'subCat',
+        formFields.subCat && formFields.subCat.trim()
+          ? formFields.subCat.trim()
+          : 'default-value'
+      );
+      formData.append('subCat', formFields.subCat?.trim() || '');
+      formData.append('countInStock', Number(formFields.countInStock) || 0);
+      formData.append('isFeatured', Boolean(formFields.isFeatured));
+
+      // Xử lý hình ảnh hiện có
+      const existingImages = previews.filter(
+        (preview) => typeof preview === 'string' && preview.startsWith('http')
+      );
+
+      if (existingImages.length > 0) {
+        existingImages.forEach((image) => {
+          formData.append('existingImages[]', image); // Thêm [] để xử lý array
+        });
+      }
+
+      // Xử lý hình ảnh mới
+      if (files.length > 0) {
+        files.forEach((file) => {
+          if (file instanceof File) {
+            formData.append('images', file);
+          }
+        });
+      }
+
+      // Log formData để debug
+      for (let pair of formData.entries()) {
+        console.log(pair[0] + ': ' + pair[1]);
+      }
+
+      context.setProgress(50);
+
+      const response = await editData(`/api/products/${EditP}`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
       });
 
-      // Add new images (files selected)
-      console.log('New images (files):', files);
-      files.forEach((file) => {
-        console.log('Adding new file to formData:', file.name);
-        formData.append('images', file);
-      });
+      context.setProgress(70);
 
-      // Make the API call to update the product
-      await editData(`/api/products/${EditP}`, formData);
-      console.log('Edit request successful for product:', EditP);
+      if (response && response.data) {
+        setPreviews([]);
+        setFiles([]);
+        await fetchProducts();
+        handleClose();
 
-      setPreviews([]); // Clear previews after successful edit
-      setFiles([]); // Clear the new files
-      await fetchProducts(); // Refresh the product list after editing
-      handleClose(); // Close the edit dialog
+        context.setAlertBox({
+          error: false,
+          msg: 'Product updated successfully',
+          open: true,
+        });
+      }
+      context.setProgress(100);
     } catch (error) {
-      console.error('Failed to edit product:', error);
-    } finally {
-      setLoading(false);
+      console.error('Error updating product:', error);
+
+      // Log chi tiết lỗi
+      if (error.response) {
+        console.error('Error response:', error.response.data);
+        console.error('Error status:', error.response.status);
+        console.error('Error headers:', error.response.headers);
+      }
+
       context.setAlertBox({
-        error: false,
-        msg: 'Product edited successfully',
+        error: true,
+        msg:
+          error.response?.data?.message ||
+          error.message ||
+          'Failed to update product',
         open: true,
       });
-      console.log('Edit completed, loading set to false, alert box updated');
+      context.setProgress(0);
+    } finally {
+      setLoading(false);
     }
   };
-
   const handleDeleteConfirm = async () => {
     context.setProgress(30); // Set progress to 30% to indicate the deletion process has started
 
     try {
-      await deleteData(`/api/products/${deleteID}`); // Call API to delete the category
+      await deleteData(`/api/products/${deleteID}`); // Call API to delete the product
       context.setProgress(70); // Set progress to 70% after the deletion request is made
-      await fetchProducts(); // Reload the category list after deletion
-      context.setProgress(100); // Set progress to 100% after categories are fetched
+      await fetchProducts(); // Reload the product list after deletion
+      context.setProgress(100); // Set progress to 100% after products are fetched
       handleCloseDeleteDialog(); // Close the delete dialog
     } catch (error) {
-      console.error('Failed to delete category:', error);
+      console.error('Failed to delete product:', error);
       context.setProgress(0); // Optionally reset progress to 0% on error or handle as needed
     }
   };
 
   const onChangeFile = (e) => {
     if (e?.target?.files) {
-      const filesArray = Array.from(e.target.files || []);
-      setFiles(filesArray);
+      const maxSize = 5 * 1024 * 1024; // 5MB
+      const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
 
-      // Create preview URLs for new files
-      const newPreviews = filesArray.map((file) => {
-        const url = URL.createObjectURL(file);
-        return url;
+      const selectedFiles = Array.from(e.target.files);
+      const validFiles = selectedFiles.filter((file) => {
+        if (file.size > maxSize) {
+          context.setAlertBox({
+            error: true,
+            msg: `File ${file.name} is too large. Max size is 5MB`,
+            open: true,
+          });
+          return false;
+        }
+
+        if (!allowedTypes.includes(file.type)) {
+          context.setAlertBox({
+            error: true,
+            msg: `File ${file.name} is not a supported image type`,
+            open: true,
+          });
+          return false;
+        }
+
+        return true;
       });
 
-      setPreviews((prevPreviews) => [...prevPreviews, ...newPreviews]);
+      setFiles((prevFiles) => [...prevFiles, ...validFiles]);
 
-      // Cleanup old previews
-      return () => {
-        newPreviews.forEach((preview) => URL.revokeObjectURL(preview));
-      };
+      const newPreviews = validFiles.map((file) => URL.createObjectURL(file));
+      setPreviews((prevPreviews) => [...prevPreviews, ...newPreviews]);
     }
-    console.log(previews);
   };
 
   const removeFile = (index) => {
@@ -234,10 +344,20 @@ const Products = () => {
     });
   };
 
-  // Fetch products on component mount
+  // Cập nhật useEffect để cleanup
   useEffect(() => {
-    fetchProducts(); // Initial fetch for products
+    fetchProducts();
+
+    return () => {
+      // Cleanup previews khi component unmount
+      previews.forEach((preview) => {
+        if (typeof preview === 'string' && !preview.startsWith('http')) {
+          URL.revokeObjectURL(preview);
+        }
+      });
+    };
   }, []);
+
   console.log('Product list to display:', productList);
 
   return (
@@ -261,18 +381,23 @@ const Products = () => {
           <div className="col-md-3">
             <h4>SHOW BY</h4>
             <Select
-              value={showBy}
-              onChange={(e) => setShowBy(e.target.value)}
+              value={formFields.category || ''}
+              onChange={(e) => handleSelectChange(e, 'category')}
               displayEmpty
-              inputProps={{ 'aria-label': 'Without label' }}
               className="w-100"
             >
               <MenuItem value="">
                 <em>None</em>
               </MenuItem>
-              <MenuItem value={10}>Ten</MenuItem>
-              <MenuItem value={20}>Twenty</MenuItem>
-              <MenuItem value={30}>Thirty</MenuItem>
+              {loading ? (
+                <CircularProgress size={24} />
+              ) : (
+                catData.map((item, index) => (
+                  <MenuItem key={index} value={item._id}>
+                    {item.name}
+                  </MenuItem>
+                ))
+              )}
             </Select>
           </div>
         </div>
@@ -312,6 +437,7 @@ const Products = () => {
           previews={previews}
           onChangeFile={onChangeFile}
           removeFile={removeFile}
+          handleSelectChange={handleSelectChange}
         />
       </div>
     </div>

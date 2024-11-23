@@ -2,11 +2,15 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import HomeIcon from '@mui/icons-material/Home';
 import {
   Backdrop,
+  Box,
   Breadcrumbs,
   Button,
   Chip,
   CircularProgress,
+  FormControl,
+  InputLabel,
   MenuItem,
+  OutlinedInput,
   Select,
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
@@ -38,14 +42,36 @@ const StyleBreadcrumb = styled(Chip)(({ theme }) => {
   };
 });
 
+const ITEM_HEIGHT = 48;
+const ITEM_PADDING_TOP = 8;
+const MenuProps = {
+  PaperProps: {
+    style: {
+      maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
+      width: 250,
+    },
+  },
+};
+
+function getStyles(name, personName, theme) {
+  return {
+    fontWeight: personName.includes(name)
+      ? theme.typography.fontWeightMedium
+      : theme.typography.fontWeightRegular,
+  };
+}
+
 const ProductUpload = () => {
+  const [pRamData, setPRamData] = useState([]);
+  const [pWeigthData, setPWeigthData] = useState([]);
+  const [pSizeData, setPSizeData] = useState([]);
   const context = useContext(MyContext);
   const [catData, setCatData] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [showCat, setShowCat] = useState('');
+  const [subCategories, setSubCategories] = useState([]); // State lưu trữ dữ liệu subCategory
   const [isFeatured, setIsFeatured] = useState(false);
   const navigate = useNavigate();
-  const [files, setFiles] = useState([]);
+  const [files, setFiles] = useState([]); // Khởi tạo mặc định là mảng rỗng
   const [previews, setPreviews] = useState([]);
 
   // Khởi tạo trạng thái form với các trường dữ liệu
@@ -57,7 +83,12 @@ const ProductUpload = () => {
     price: '',
     oldPrice: '',
     category: '',
+    subCat: '',
     countInStock: '',
+    discount: 0,
+    weightName: [],
+    ramName: [],
+    sizeName: [],
     isFeatured: false,
   });
 
@@ -80,9 +111,55 @@ const ProductUpload = () => {
         setLoading(false);
       });
   }, []);
+  useEffect(() => {
+    const fetchAllData = async () => {
+      setLoading(true);
+      try {
+        const [prams, weights, sizes] = await Promise.all([
+          fetchDataFromApi('/api/prams'),
+          fetchDataFromApi('/api/weight'),
+          fetchDataFromApi('/api/psize'),
+        ]);
+        setPRamData(prams.data || []);
+        setPWeigthData(weights.data || []);
+        setPSizeData(sizes.data || []);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAllData();
+  }, []);
+
+  useEffect(() => {
+    // Hàm fetch dữ liệu subCategory từ API
+    const fetchSubCategories = async () => {
+      setLoading(true); // Đặt loading = true khi bắt đầu fetch
+      try {
+        await fetchDataFromApi('/api/subCategory').then((res) => {
+          // Kiểm tra và lưu dữ liệu vào state
+          if (Array.isArray(res.data)) {
+            setSubCategories(res.data);
+          } else {
+            setSubCategories([]);
+          }
+        });
+      } catch (error) {
+        console.error('Error fetching subcategories:', error);
+        setSubCategories([]); // Nếu có lỗi thì set mảng trống
+      } finally {
+        setLoading(false); // Đặt loading = false khi hoàn thành fetch
+      }
+    };
+
+    fetchSubCategories(); // Gọi hàm fetch khi component mount
+  }, []); // [] chỉ chạy 1 lần khi component mount
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
+    console.log(`[DEBUG] Input changed - Name: ${name}, Value: ${value}`);
     setFormFields((prev) => ({
       ...prev,
       [name]: type === 'checkbox' ? checked : value,
@@ -93,161 +170,239 @@ const ProductUpload = () => {
     const files = e.target.files;
     if (files.length === 0) return;
 
-    // Update state to store the selected files
+    const validTypes = ['image/jpeg', 'image/png', 'image/jpg'];
+    const imgArr = Array.from(files)
+      .filter((file) => validTypes.includes(file.type))
+      .map((file) => URL.createObjectURL(file));
+
+    if (imgArr.length === 0) {
+      context.setAlertBox({
+        open: true,
+        error: true,
+        msg: 'Chỉ được upload file ảnh (JPEG, PNG, JPG)!',
+      });
+      return;
+    }
+
     setFiles((prevFiles) => [...prevFiles, ...files]);
-
-    // Generate preview URLs for the selected files
-    const imgArr = Array.from(files).map((file) => URL.createObjectURL(file));
-
-    // Update the previews state with the generated image URLs
     setPreviews((prevArr) => [...prevArr, ...imgArr]);
   };
 
-  const removeFile = (index) => {
-    setFiles((prevFiles) => prevFiles.filter((_, i) => i !== index));
-    setPreviews((prevPreviews) => prevPreviews.filter((_, i) => i !== index));
-  };
-
   // Xử lý thay đổi danh mục
-  const handleChangeCategory = (e) => {
-    setShowCat(e.target.value);
+  const handleSelectChange = (e, fieldName) => {
     setFormFields((prev) => ({
       ...prev,
-      category: e.target.value,
+      [fieldName]: e.target.value,
     }));
   };
 
-  // Xử lý thay đổi giá trị "isFeatured"
-  const handleIsFeaturedChange = (e) => {
-    setIsFeatured(e.target.value);
-    setFormFields(() => ({
-      ...formFields,
-      isFeatured: e.target.value,
-    }));
-  };
+  // const addProduct = async (event) => {
+  //   event.preventDefault();
+  //   setLoading(true);
+
+  //   const {
+  //     name,
+  //     price,
+  //     category,
+  //     subCat,
+  //     description,
+  //     brand,
+  //     oldPrice,
+  //     countInStock,
+  //     discount,
+  //     weightName,
+  //     ramName,
+  //     sizeName,
+  //     isFeatured,
+  //   } = formFields;
+
+  //   // Kiểm tra các trường bắt buộc
+  //   if (!name || !price || !category || !subCat || files.length === 0) {
+  //     setLoading(false);
+  //     context.setAlertBox({
+  //       open: true,
+  //       error: true,
+  //       msg: 'Vui lòng nhập toàn bộ, không được để trống!',
+  //     });
+  //     return;
+  //   }
+
+  //   try {
+  //     const fd = new FormData();
+  //     fd.append('name', name);
+  //     fd.append('price', price);
+  //     fd.append('category', category._id || category);
+  //     fd.append('subCat', subCat._id || subCat);
+  //     fd.append('description', description || '');
+  //     fd.append('brand', brand || '');
+  //     fd.append('oldPrice', oldPrice || price);
+  //     fd.append('countInStock', countInStock || 0);
+  //     fd.append('discount', discount);
+  //     fd.append('weightName', weightName.join(','));
+  //     fd.append('ramName', ramName.join(','));
+  //     fd.append('sizeName', sizeName.join(','));
+
+  //     fd.append('isFeatured', Boolean(isFeatured));
+
+  //     // Đảm bảo `files` là mảng
+  //     if (!Array.isArray(files)) {
+  //       console.log('Files is not an array:', files);
+  //       setLoading(false);
+  //       return;
+  //     }
+
+  //     files.forEach((file) => fd.append('images', file));
+
+  //     const response = await postData('/api/products/create', fd);
+
+  //     if (response.success) {
+  //       context.setAlertBox({
+  //         open: true,
+  //         error: false,
+  //         msg: 'Bạn đã thêm sản phẩm thành công!',
+  //       });
+  //       setFormFields({
+  //         name: '',
+  //         description: '',
+  //         images: [],
+  //         brand: '',
+  //         price: '',
+  //         oldPrice: '',
+  //         category: '',
+  //         subCat: '',
+  //         countInStock: '',
+  //         discount: 0,
+  //         weightName: [],
+  //         ramName: [],
+  //         sizeName: [],
+  //         isFeatured: false,
+  //       });
+  //       setFiles([]); // Reset state files
+  //       setPreviews([]); // Reset state previews
+  //       navigate('/product/productlist');
+  //     } else {
+  //       throw new Error(response.message || 'Thêm sản phẩm thất bại');
+  //     }
+  //   } catch (error) {
+  //     context.setAlertBox({
+  //       open: true,
+  //       error: true,
+  //       msg: error.message || 'Đã xảy ra lỗi, vui lòng thử lại.',
+  //     });
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  //   console.log('[DEBUG] weightName:', weightName);
+  // };
 
   const addProduct = async (event) => {
-    event.preventDefault(); // Prevent form submission
+    event.preventDefault();
+    setLoading(true);
 
-    setLoading(true); // Start loading state
+    const {
+      name,
+      category,
+      subCat,
+      description,
+      brand,
+      oldPrice,
+      countInStock,
+      discount,
+      weightName,
+      ramName,
+      sizeName,
+      isFeatured,
+    } = formFields;
 
-    // Set a timeout to simulate a loading delay before showing the notification
-    setTimeout(async () => {
-      // Destructure the form fields for easy reference
-      const {
-        name,
-        price,
-        category,
-        images,
-        description,
-        brand,
-        oldPrice,
-        countInStock,
-        isFeatured,
-      } = formFields;
+    // Kiểm tra các trường bắt buộc
+    if (!name || !oldPrice || !category || !subCat || files.length === 0) {
+      setLoading(false);
+      context.setAlertBox({
+        open: true,
+        error: true,
+        msg: 'Vui lòng nhập toàn bộ, không được để trống!',
+      });
+      return;
+    }
 
-      // Validate required fields
-      if (!name || !price || !category || files.length === 0) {
-        // Check if files are selected
-        setLoading(false);
+    // Kiểm tra giá trị discount (nếu cần thiết)
+    if (discount < 0 || discount > 100) {
+      setLoading(false);
+      context.setAlertBox({
+        open: true,
+        error: true,
+        msg: 'Giảm giá phải nằm trong khoảng từ 0 đến 100%.',
+      });
+      return;
+    }
 
-        context.setAlertBox({
-          open: true,
-          error: true,
-          msg: 'Vui lòng nhập toàn bộ, không được để trống!',
-        });
-        return;
-      }
-
-      // Validate price
-      const parsedPrice = parseFloat(price);
-      if (isNaN(parsedPrice) || parsedPrice <= 0) {
-        setLoading(false);
-        context.setAlertBox({
-          open: true,
-          error: true,
-          msg: 'Giá phải là số lớn hơn 0.',
-        });
-        return;
-      }
-
-      // Validate countInStock if provided
-      const parsedStock = parseInt(countInStock, 10);
-      if (countInStock && (isNaN(parsedStock) || parsedStock < 0)) {
-        setLoading(false);
-        context.setAlertBox({
-          open: true,
-          error: true,
-          msg: 'Số lượng trong kho phải là một số không âm.',
-        });
-        return;
-      }
-
-      // Create FormData and append only the provided fields
+    try {
       const fd = new FormData();
       fd.append('name', name);
-      fd.append('price', parsedPrice);
-      fd.append('category', category);
-      if (description) fd.append('description', description);
-      if (brand) fd.append('brand', brand);
-      if (oldPrice) fd.append('oldPrice', oldPrice);
-      if (countInStock) fd.append('countInStock', parsedStock);
-      fd.append('isFeatured', isFeatured);
+      fd.append('category', category._id || category);
+      fd.append('subCat', subCat._id || subCat);
+      fd.append('description', description || '');
+      fd.append('brand', brand || '');
+      fd.append('oldPrice', oldPrice);
+      fd.append('countInStock', countInStock || 0);
+      fd.append('discount', discount || 0);
+      fd.append('weightName', weightName.join(','));
+      fd.append('ramName', ramName.join(','));
+      fd.append('sizeName', sizeName.join(','));
+      fd.append('isFeatured', Boolean(isFeatured));
 
-      // Append images (from the files array)
+      // Đảm bảo `files` là mảng
+      if (!Array.isArray(files)) {
+        console.log('Files is not an array:', files);
+        setLoading(false);
+        return;
+      }
+
       files.forEach((file) => fd.append('images', file));
-      console.log(...fd);
-      try {
-        // API call to create product
-        await postData('/api/products/create', fd);
 
-        // On success, show a success message
+      // Gửi dữ liệu đến API
+      const response = await postData('/api/products/create', fd);
+
+      if (response.success) {
         context.setAlertBox({
           open: true,
           error: false,
-          msg: 'Bạn đã thêm sản phẩm thành công!',
+          msg: 'Bạn đã thêm sản phẩm thành công!',
         });
 
-        setLoading(false); // End loading state
-
-        // Reset form fields and state
+        // Reset form fields và chuyển hướng
         setFormFields({
           name: '',
           description: '',
           images: [],
           brand: '',
-          price: '',
           oldPrice: '',
           category: '',
+          subCat: '',
           countInStock: '',
+          discount: 0,
+          weightName: [],
+          ramName: [],
+          sizeName: [],
           isFeatured: false,
         });
-        setFiles([]); // Reset file input
-        setPreviews([]); // Reset previews
-
-        // Navigate to the product list page
+        setFiles([]); // Reset state files
+        setPreviews([]); // Reset state previews
         navigate('/product/productlist');
-      } catch (error) {
-        console.error('Error creating product:', error);
-        if (error.response && error.response.data) {
-          console.error('Server response:', error.response.data); // Log the response data for debugging
-          context.setAlertBox({
-            open: true,
-            error: true,
-            msg:
-              error.response.data.message ||
-              'Đã xảy ra lỗi khi tạo sản phẩm. Vui lòng thử lại.',
-          });
-        } else {
-          context.setAlertBox({
-            open: true,
-            error: true,
-            msg: 'Đã xảy ra lỗi không xác định. Vui lòng thử lại sau.',
-          });
-        }
-        setLoading(false); // End loading state on error
+      } else {
+        throw new Error(response.message || 'Thêm sản phẩm thất bại');
       }
-    }, 1000); // Add delay of 1000ms before showing the notification
+    } catch (error) {
+      context.setAlertBox({
+        open: true,
+        error: true,
+        msg: error.message || 'Đã xảy ra lỗi, vui lòng thử lại.',
+      });
+    } finally {
+      setLoading(false);
+    }
+
+    console.log('[DEBUG] weightName:', weightName);
   };
 
   return (
@@ -298,39 +453,48 @@ const ProductUpload = () => {
                   <div className="form-group">
                     <h6>CATEGORY</h6>
                     <Select
-                      value={formFields.category || ''} // Use an empty string as a fallback
-                      onChange={handleChangeCategory}
+                      value={formFields.category || ''}
+                      onChange={(e) => handleSelectChange(e, 'category')}
                       displayEmpty
                       className="w-100"
                     >
                       <MenuItem value="">
                         <em>None</em>
                       </MenuItem>
-                      {catData.map((item, index) => (
+                      {catData.length === 0 ? (
+                        <MenuItem disabled>Không tìm thấy danh mục</MenuItem>
+                      ) : (
+                        catData.map((item, index) => (
+                          <MenuItem key={index} value={item._id}>
+                            {item.name}
+                          </MenuItem>
+                        ))
+                      )}
+                    </Select>
+                  </div>
+                </div>
+                <div className="col">
+                  <div className="form-group">
+                    <h6>SUB CATEGORY</h6>
+                    <Select
+                      value={formFields.subCat || ''}
+                      onChange={(e) => handleSelectChange(e, 'subCat')}
+                      displayEmpty
+                      className="w-100"
+                    >
+                      <MenuItem value="">
+                        <em>None</em>
+                      </MenuItem>
+                      {subCategories?.map((item, index) => (
                         <MenuItem key={index} value={item._id}>
-                          {item.name}
+                          {item.subCat || 'No Subcategory'}
                         </MenuItem>
                       ))}
                     </Select>
                   </div>
                 </div>
-                {/* <div className="col">
-                  <div className="form-group">
-                    <h6>SUB CATEGORY</h6>
-                    <Select
-                      value={formFields.setShowSubCat}
-                      onChange={(e) => setShowSubCat(e.target.value)}
-                      displayEmpty
-                      className="w-100"
-                    >
-                      <MenuItem value="">
-                        <em>None</em>
-                      </MenuItem>
-                      <MenuItem>Jeans</MenuItem>
-                      <MenuItem>Shorts</MenuItem>
-                    </Select>
-                  </div>
-                </div> */}
+              </div>
+              <div className="row">
                 <div className="col">
                   <div className="form-group">
                     <h6>OLD PRICE</h6>
@@ -342,34 +506,8 @@ const ProductUpload = () => {
                     />
                   </div>
                 </div>
-              </div>
-              <div className="row">
-                <div className="col">
-                  <div className="form-group">
-                    <h6>NEW PRICE</h6>
-                    <input
-                      type="text"
-                      name="price"
-                      onChange={handleInputChange}
-                      value={formFields.price}
-                    />
-                  </div>
-                </div>
-                <div className="col">
-                  <div className="form-group">
-                    <h6>Is Featured</h6>
-                    <Select
-                      value={formFields.isFeatured || false}
-                      onChange={handleIsFeaturedChange}
-                      name="isFeatured" // Include name to capture in handleInputChange
-                      displayEmpty
-                      className="w-100"
-                    >
-                      <MenuItem value={false}>False</MenuItem>
-                      <MenuItem value={true}>True</MenuItem>
-                    </Select>
-                  </div>
-                </div>
+                
+
                 <div className="col">
                   <div className="form-group">
                     <h6>PRODUCT STOCK</h6>
@@ -395,60 +533,127 @@ const ProductUpload = () => {
                     />
                   </div>
                 </div>
-                {/* <div className="col">
+                <div className="col">
                   <div className="form-group">
-                    <h6>PRODUCT RAM</h6>
+                    <h6>Is Featured</h6>
                     <Select
-                      value={formFields.showRam}
-                      onChange={(e) => setShowRam(e.target.value)}
+                      value={formFields.isFeatured}
+                      onChange={(e) => handleSelectChange(e, 'isFeatured')}
+                      name="isFeatured"
                       displayEmpty
                       className="w-100"
                     >
-                      <MenuItem value="">
-                        <em>None</em>
-                      </MenuItem>
-                      <MenuItem>4GB</MenuItem>
-                      <MenuItem>8GB</MenuItem>
-                      <MenuItem>12GB</MenuItem>
+                      <MenuItem value={false}>False</MenuItem>
+                      <MenuItem value={true}>True</MenuItem>
                     </Select>
                   </div>
-                </div> */}
+                </div>
+                <div className="col">
+                  <div className="form-group">
+                    <h6>DISCOUNT</h6>
+                    <input
+                      type="text"
+                      name="discount"
+                      onChange={handleInputChange}
+                      value={formFields.discount}
+                    />
+                  </div>
+                </div>
+              </div>
+              <div className="row">
+                <div className="col">
+                  <div className="form-group">
+                    <h6>PRODUCT RAM</h6>
+                    <FormControl sx={{ m: 1, width: '100%' }}>
+                      <Select
+                        multiple
+                        value={formFields.ramName || []} // Ensure this is an array
+                        onChange={(e) => handleSelectChange(e, 'ramName')}
+                        renderValue={(selected) => (
+                          <Box
+                            sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}
+                          >
+                            {selected.map((value) => (
+                              <Chip key={value} label={value} />
+                            ))}
+                          </Box>
+                        )}
+                        MenuProps={MenuProps}
+                      >
+                        {pRamData.map((item) => (
+                          <MenuItem key={item._id} value={item.ramName}>
+                            {item.ramName}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                  </div>
+                </div>
+                <div className="col">
+                  <div className="form-group">
+                    <h6>PRODUCT WEIGHT</h6>
+                    <FormControl sx={{ m: 1, width: '100%' }}>
+                      <Select
+                        multiple
+                        value={formFields.weightName || []} // Ensure this is an array
+                        onChange={(e) => handleSelectChange(e, 'weightName')}
+                        renderValue={(selected) => (
+                          <Box
+                            sx={{
+                              display: 'flex',
+                              flexWrap: 'wrap',
+                              gap: 0.5,
+                              fontSize: '1.6rem',
+                            }}
+                          >
+                            {selected.map((value) => (
+                              <Chip key={value} label={value} />
+                            ))}
+                          </Box>
+                        )}
+                        MenuProps={MenuProps}
+                      >
+                        {pWeigthData.map((item) => (
+                          <MenuItem key={item._id} value={item.weightName}>
+                            {item.weightName}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                  </div>
+                </div>
+                <div className="col">
+                  <div className="form-group">
+                    <h6>PRODUCT SIZE</h6>
+                    <FormControl sx={{ m: 1, width: '100%' }}>
+                      <Select
+                        multiple
+                        value={formFields.sizeName || []} // Ensure this is an array
+                        onChange={(e) => handleSelectChange(e, 'sizeName')}
+                        renderValue={(selected) => (
+                          <Box
+                            sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}
+                          >
+                            {selected.map((value) => (
+                              <Chip key={value} label={value} />
+                            ))}
+                          </Box>
+                        )}
+                        MenuProps={MenuProps}
+                      >
+                        {pSizeData.map((item) => (
+                          <MenuItem key={item._id} value={item.sizeName}>
+                            {item.sizeName}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
-          {/* <div className="col-md-3">
-            <div className="stickyBox">
-              <h4>Product Images</h4>
-              <div className="imgGrid d-flex">
-                {productImgArr.length > 0 &&
-                  productImgArr.map((item, index) => (
-                    <div className="img" key={index}>
-                      <img src={item} alt="" />
-                    </div>
-                  ))}
-              </div>
-            </div>
-          </div> */}
         </div>
-
-        {/* <div className="row">
-          <div className="col">
-            <div className="form-group">
-              <h6>product Image</h6>
-              <div className="position-relative inputBtn">
-                <input
-                  type="text"
-                  ref={productImgs}
-                  name="images"
-                  onChange={inputChange}
-                />
-                <Button onClick={addProductImg} className="btn-lg btn-blue">
-                  Add
-                </Button>
-              </div>
-            </div>
-          </div>
-        </div> */}
 
         <div className="card p-4 mt-0 w-100">
           <div className="imagesUploadSec">

@@ -41,14 +41,12 @@ const StyleBreadcrumb = styled(Chip)(({ theme }) => {
 });
 
 // Main Component
-const Category = () => {
+const SubCategory = () => {
   const context = useContext(MyContext);
   const [loading, setLoading] = useState(false);
   const [formFields, setFormFields] = useState({
-    name: '',
-    subCat: "",
-    images: [],
-    color: '',
+    category: '',
+    subCat: '',
   });
   const [open, setOpen] = useState(false);
   const [catData, setCatData] = useState([]);
@@ -61,7 +59,7 @@ const Category = () => {
   const fetchCategories = async (page = 1) => {
     setLoading(true); // Đặt trạng thái loading thành true
     try {
-      const response = await fetchDataFromApi(`/api/category?page=${page}`);
+      const response = await fetchDataFromApi(`/api/subCategory`);
       setCatData(response); // Cập nhật trạng thái catData với dữ liệu nhận được
     } catch (error) {
       console.error('Failed to fetch categories:', error);
@@ -69,7 +67,6 @@ const Category = () => {
       setLoading(false); // Đặt trạng thái loading thành false
     }
   };
-
   useEffect(() => {
     context.setProgress(30);
     fetchCategories(context.setProgress(100)); // Gọi hàm để tải danh mục khi component được mount
@@ -79,12 +76,11 @@ const Category = () => {
     setOpen(true);
     setEditID(_id);
     try {
-      const res = await fetchDataFromApi(`/api/category/${_id}`);
+      const res = await fetchDataFromApi(`/api/subCategory/${_id}`);
       if (res) {
         setFormFields({
-          name: res.name,
+          category: res.category,
           subCat: res.subCat,
-          color: res.color,
         });
         // Set previews from existing images
         setPreviews(res.images || []);
@@ -93,73 +89,6 @@ const Category = () => {
       console.error('Failed to fetch category data:', error);
     }
   };
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormFields((prevFields) => ({
-      ...prevFields,
-      [name]: value,
-    }));
-  };
-
-  const handleClose = () => {
-    setOpen(false); // Đóng dialog
-    setFormFields({ name: '', subCat: "", images: '', color: '' }); // Đặt lại các trường trong form
-  };
-
-  const editCategoryFun = async (event) => {
-    event.preventDefault();
-    setLoading(true);
-
-    try {
-      const formData = new FormData();
-      formData.append('name', formFields.name);
-      formData.append('subCat', formFields.subCat);
-      formData.append('color', formFields.color);
-
-      // Append existing images that weren't removed
-      previews.forEach((preview, index) => {
-        if (typeof preview === 'string' && preview.startsWith('http')) {
-          formData.append('existingImages', preview);
-        }
-      });
-
-      // Append new files
-      files.forEach((file) => {
-        formData.append('images', file);
-      });
-
-      await editData(`/api/category/${editID}`, formData);
-
-      // Reset states and fetch updated data
-      setPreviews([]);
-      setFiles([]);
-      await fetchCategories();
-      handleClose();
-
-      context.setAlertBox({
-        error: false,
-        msg: 'Sửa thành công',
-        open: true,
-      });
-    } catch (error) {
-      console.error('Failed to edit category:', error);
-      context.setAlertBox({
-        error: true,
-        msg: 'Lỗi xảy ra khi chỉnh sửa danh mục',
-        open: true,
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const changeInput = (e) => {
-    setFormFields((prevFields) => ({
-      ...prevFields,
-      [e.target.name]: e.target.value, // Cập nhật trường tương ứng trong form
-    }));
-  };
-
   const handleOpenDeleteDialog = (_id) => {
     setDeleteID(_id); // Cập nhật ID của danh mục đang xóa
     setOpenDeleteDialog(true); // Mở dialog xóa
@@ -174,7 +103,7 @@ const Category = () => {
     context.setProgress(30); // Set progress to 30% to indicate the deletion process has started
 
     try {
-      await deleteData(`/api/category/${deleteID}`); // Call API to delete the category
+      await deleteData(`/api/subCategory/${deleteID}`); // Call API to delete the category
       context.setProgress(70); // Set progress to 70% after the deletion request is made
       await fetchCategories(); // Reload the category list after deletion
       context.setProgress(100); // Set progress to 100% after categories are fetched
@@ -197,34 +126,6 @@ const Category = () => {
       context.setProgress(100); // Set progress to 100% after fetching
     }
   };
-
-  const onChangeFile = (e) => {
-    if (e?.target?.files) {
-      const filesArray = Array.from(e.target.files);
-      setFiles(filesArray);
-
-      // Create preview URLs for new files
-      const newPreviews = filesArray.map((file) => URL.createObjectURL(file));
-      setPreviews((prevPreviews) => [...prevPreviews, ...newPreviews]);
-    }
-    
-  };
- 
-  const removeFile = (index) => {
-    setPreviews((prevPreviews) => {
-      const newPreviews = [...prevPreviews];
-      newPreviews.splice(index, 1);
-      return newPreviews;
-    });
-
-    setFiles((prevFiles) => {
-      const newFiles = [...prevFiles];
-      newFiles.splice(index, 1);
-      return newFiles;
-    });
-  };
-  console.log(catData);
-  
 
   return (
     <>
@@ -261,11 +162,11 @@ const Category = () => {
           {/* Table */}
           <div className="table-responsive w-100 mt-5">
             <CategoryTable
-              isShowTable={true}
+              isShowTable={false}
               catData={catData}
               editCat={editCat}
               handleOpenDeleteDialog={handleOpenDeleteDialog}
-              isShowIcon={true}
+              isShowIcon={false}
             />
 
             {/* Footer */}
@@ -284,24 +185,6 @@ const Category = () => {
           onDelete={handleDeleteConfirm}
         />
 
-        {/* Edit Category Dialog */}
-
-        <EditCategoryDialog
-          open={open}
-          formFields={formFields}
-          handleInputChange={handleInputChange}
-          changeInput={changeInput}
-          loading={loading}
-          bgColor={bgColor}
-          editCategoryFun={editCategoryFun}
-          handleClose={handleClose}
-          previews={previews}
-          onChangeFile={onChangeFile}
-          removeFile={removeFile}
-          isShowEdit={true}
-        />
-
-        {/* Backdrop for loading */}
         <Backdrop
           sx={{
             color: '#fff',
@@ -319,4 +202,4 @@ const Category = () => {
   );
 };
 
-export default Category;
+export default SubCategory;

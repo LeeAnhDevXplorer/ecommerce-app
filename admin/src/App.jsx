@@ -8,15 +8,18 @@ import LoadingBar from 'react-top-loading-bar';
 import Header from './Components/Header/Header';
 import SideBar from './Components/SideBar/SideBar';
 import Category from './Pages/Category/Category';
-import CategoryAdd from './Pages/Category/CategoryAdd';
 import Home from './Pages/Home/Home';
 import Login from './Pages/Login/Login';
 // import ProductDetails from './Pages/Products/ProductDetails';
 import Products from './Pages/Products/Products';
 // import ProductUpload from './Pages/Products/ProductUpload';
-import SignUp from './Pages/SignUp/SignUp';
-import ProductUpload from './Pages/Products/ProductUpload';
+import CategoryAdd from './Pages/Category/AddCategory/CategoryAdd';
+import AddSubcat from './Pages/Category/AddSubcat/AddSubcat';
+import SubCategory from './Pages/Category/SubCategory';
 import ProductDetails from './Pages/Products/ProductDetails';
+import ProductRams from './Pages/Products/ProductRams';
+import ProductUpload from './Pages/Products/ProductUpload';
+import SignUp from './Pages/SignUp/SignUp';
 
 const MyContext = createContext();
 const App = () => {
@@ -135,6 +138,22 @@ const App = () => {
                   path="/category/categorylist"
                   exact={true}
                   element={<Category />}
+                />
+                <Route
+                  path="/category/addsubcat"
+                  exact={true}
+                  element={<AddSubcat />}
+                />
+
+                <Route
+                  path="/category/subcategory"
+                  exact={true}
+                  element={<SubCategory />}
+                />
+                <Route
+                  path="/product/productrams"
+                  exact={true}
+                  element={<ProductRams />}
                 />
               </Routes>
             </div>

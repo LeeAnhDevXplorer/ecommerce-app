@@ -3,7 +3,10 @@ import { TiDelete } from 'react-icons/ti';
 
 const ImageUpload = ({ previews, onChangeFile, removeFile }) => (
   <div className="imagesUploadSec">
-    <h5 className="mb-4">Media And Published</h5>
+    <h5 className="mb-4" style={{ fontSize: '1.6rem', marginTop: '10px' }}>
+      Media And Published
+    </h5>
+    <h1 style={{fontSize: "1.5rem", textAlign: "center", margin: "20px"}}>Bạn vui lòng chọn lại toàn bộ ảnh! (Nếu không chọn ảnh sẽ bị xóa)</h1>
     <div className="imgUploadBox d-flex align-items-center">
       {previews.map((item, index) => (
         <div className="uploadBox d-flex" key={index}>

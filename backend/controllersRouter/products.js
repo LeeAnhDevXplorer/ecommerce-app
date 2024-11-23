@@ -1,10 +1,15 @@
 import { v2 as cloudinary } from 'cloudinary';
 import express from 'express';
 import fs from 'fs';
+import mongoose from 'mongoose';
 import multer from 'multer';
 import pLimit from 'p-limit';
 import { Category } from '../models/categories.js';
+import { ProductWeigth } from '../models/productWeigths.js';
 import { Products } from '../models/products.js';
+import { ProductRams } from '../models/productsRams.js';
+import { ProductSize } from '../models/productsSize.js';
+import { SubCategory } from '../models/subCategory.js';
 
 cloudinary.config({
   cloud_name: process.env.cloudinary_Config_Cloud_Name,
@@ -35,7 +40,6 @@ const uploadImages = async (images) => {
         cloudinary.uploader
           .upload(image.path)
           .then((result) => {
-            // Clean up locally saved file after successful upload
             fs.unlinkSync(image.path); // Delete the file after uploading
             return {
               success: true,
@@ -58,10 +62,12 @@ router.post('/upload', upload.array('images'), async (req, res) => {
   const cloudinaryUploadResults = await uploadImages(req.files);
   res.json({ uploadedFiles, cloudinaryUploadResults });
 });
+
+// Route to fetch all products with pagination
 router.get('/', async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
-    const perPage = 10; // Show 10 products per page, adjust as needed
+    const perPage = 10;
     const totalPosts = await Products.countDocuments();
     const totalPages = Math.ceil(totalPosts / perPage);
 
@@ -71,6 +77,10 @@ router.get('/', async (req, res) => {
 
     const productList = await Products.find()
       .populate('category')
+      .populate('subCat')
+      .populate('weightName')
+      .populate('ramName')
+      .populate('sizeName')
       .skip((page - 1) * perPage)
       .limit(perPage)
       .exec();
@@ -95,7 +105,12 @@ router.get('/', async (req, res) => {
 // Route to get a single product by ID
 router.get('/:id', async (req, res) => {
   try {
-    const product = await Products.findById(req.params.id);
+    const product = await Products.findById(req.params.id)
+      .populate('category')
+      .populate('subCat')
+      .populate('weightName')
+      .populate('ramName')
+      .populate('sizeName');
     if (!product) {
       return res.status(404).json({ message: 'Product not found' });
     }
@@ -107,67 +122,283 @@ router.get('/:id', async (req, res) => {
   }
 });
 
+// router.post('/create', upload.array('images'), async (req, res) => {
+//   try {
+//     console.log('--- Debug Start: Product Creation ---');
+//     console.log('Request Body:', req.body);
+
+//     // Upload images and get their URLs
+//     const uploadStatus = await uploadImages(req.files);
+//     console.log('Image Upload Status:', uploadStatus);
+
+//     const imgUrls = uploadStatus
+//       .filter((item) => item.success)
+//       .map((item) => item.url);
+
+//     console.log('Filtered Image URLs:', imgUrls);
+
+//     if (imgUrls.length === 0) {
+//       return res.status(500).json({
+//         success: false,
+//         message: 'Image upload failed.',
+//       });
+//     }
+
+//     // Extract fields from request body
+//     const {
+//       name,
+//       price,
+//       category,
+//       subCat,
+//       description,
+//       brand,
+//       oldPrice,
+//       countInStock,
+//       rating,
+//       isFeatured,
+//       discount,
+//       weightName, // A comma-separated string of weight names
+//       ramName,
+//       sizeName,
+//     } = req.body;
+
+//     console.log('Parsed Fields:', {
+//       name,
+//       price,
+//       category,
+//       subCat,
+//       description,
+//       brand,
+//       oldPrice,
+//       countInStock,
+//       rating,
+//       isFeatured,
+//       discount,
+//       weightName,
+//       ramName,
+//       sizeName,
+//     });
+
+//     // Validate ObjectId fields for category and subCat
+//     if (!mongoose.isValidObjectId(category)) {
+//       return res
+//         .status(400)
+//         .json({ success: false, message: 'Invalid category ID.' });
+//     }
+//     if (!mongoose.isValidObjectId(subCat)) {
+//       return res
+//         .status(400)
+//         .json({ success: false, message: 'Invalid sub-category ID.' });
+//     }
+
+//     // Split and process weightName, ramName, and sizeName
+//     const weightNames = weightName.split(',').map((w) => w.trim());
+//     const ramNames = ramName.split(',').map((r) => r.trim());
+//     const sizeNames = sizeName.split(',').map((s) => s.trim());
+
+//     console.log('Split Weight Names:', weightNames);
+
+//     // Fetch IDs for weights
+//     const weightDocs = await ProductWeigth.find({
+//       weightName: { $in: weightNames },
+//     });
+//     const weightIds = weightDocs.map((doc) => doc._id);
+
+//     if (weightIds.length !== weightNames.length) {
+//       const foundWeights = weightDocs.map((doc) => doc.weightName);
+//       const missingWeights = weightNames.filter(
+//         (w) => !foundWeights.includes(w)
+//       );
+//       return res.status(400).json({
+//         success: false,
+//         message: `Invalid weights provided: ${missingWeights.join(', ')}`,
+//       });
+//     }
+
+//     // Fetch IDs for RAMs and Sizes
+//     const ramDocs = await ProductRams.find({ ramName: { $in: ramNames } });
+//     const ramIds = ramDocs.map((doc) => doc._id);
+
+//     const sizeDocs = await ProductSize.find({ sizeName: { $in: sizeNames } });
+//     const sizeIds = sizeDocs.map((doc) => doc._id);
+
+//     // Validate category and sub-category existence
+//     const existingCategory = await Category.findById(category);
+//     if (!existingCategory) {
+//       return res
+//         .status(400)
+//         .json({ success: false, message: 'Invalid category.' });
+//     }
+
+//     const existingSubCategory = await SubCategory.findById(subCat);
+//     if (!existingSubCategory) {
+//       return res
+//         .status(400)
+//         .json({ success: false, message: 'Invalid sub-category.' });
+//     }
+
+//     // Create new product
+//     const newProduct = new Products({
+//       name,
+//       description,
+//       images: imgUrls,
+//       brand,
+//       price,
+//       oldPrice,
+//       category,
+//       subCat,
+//       countInStock,
+//       rating: rating || 0,
+//       isFeatured: isFeatured || false,
+//       discount,
+//       weightName: weightIds, // Array of ObjectId for weights
+//       ramName: ramIds, // Array of ObjectId for RAMs
+//       sizeName: sizeIds, // Array of ObjectId for Sizes
+//     });
+
+//     const savedProduct = await newProduct.save();
+//     console.log('Product saved successfully:', savedProduct);
+
+//     return res.status(201).json({
+//       success: true,
+//       message: 'Product created successfully.',
+//       product: savedProduct,
+//     });
+//   } catch (error) {
+//     console.error('Error creating product:', error.message);
+//     res.status(500).json({
+//       success: false,
+//       message: 'Server error.',
+//       error: error.message,
+//     });
+//   }
+// });
+
+// PUT: Update an existing product
+
 router.post('/create', upload.array('images'), async (req, res) => {
   try {
-    // Check if files are provided
-    if (!req.files || req.files.length === 0) {
-      return res.status(400).json({
-        message: 'No images provided.',
-        success: false,
-      });
-    }
+    console.log('--- Debug Start: Product Creation ---');
+    console.log('Request Body:', req.body);
 
-    // Upload images to Cloudinary
+    // Upload images and get their URLs
     const uploadStatus = await uploadImages(req.files);
+    console.log('Image Upload Status:', uploadStatus);
 
-    // Extract URLs of uploaded images
     const imgUrls = uploadStatus
       .filter((item) => item.success)
       .map((item) => item.url);
 
+    console.log('Filtered Image URLs:', imgUrls);
+
     if (imgUrls.length === 0) {
       return res.status(500).json({
-        message: 'Failed to upload images',
         success: false,
+        message: 'Image upload failed.',
       });
     }
 
-    // Destructure product details from request body
+    // Extract fields from request body
     const {
       name,
-      price,
       category,
+      subCat,
       description,
       brand,
       oldPrice,
       countInStock,
       rating,
       isFeatured,
+      discount,
+      weightName, // A comma-separated string of weight names
+      ramName,
+      sizeName,
     } = req.body;
 
-    // Validate required fields
-    if (
-      !name ||
-      !price ||
-      !category ||
-      !description ||
-      !brand ||
-      countInStock == null
-    ) {
+    console.log('Parsed Fields:', {
+      name,
+      category,
+      subCat,
+      description,
+      brand,
+      oldPrice,
+      countInStock,
+      rating,
+      isFeatured,
+      discount,
+      weightName,
+      ramName,
+      sizeName,
+    });
+
+    // Validate ObjectId fields for category and subCat
+    if (!mongoose.isValidObjectId(category)) {
+      return res
+        .status(400)
+        .json({ success: false, message: 'Invalid category ID.' });
+    }
+    if (!mongoose.isValidObjectId(subCat)) {
+      return res
+        .status(400)
+        .json({ success: false, message: 'Invalid sub-category ID.' });
+    }
+
+    // Split and process weightName, ramName, and sizeName
+    const weightNames = weightName.split(',').map((w) => w.trim());
+    const ramNames = ramName.split(',').map((r) => r.trim());
+    const sizeNames = sizeName.split(',').map((s) => s.trim());
+
+    console.log('Split Weight Names:', weightNames);
+
+    // Fetch IDs for weights
+    const weightDocs = await ProductWeigth.find({
+      weightName: { $in: weightNames },
+    });
+    const weightIds = weightDocs.map((doc) => doc._id);
+
+    if (weightIds.length !== weightNames.length) {
+      const foundWeights = weightDocs.map((doc) => doc.weightName);
+      const missingWeights = weightNames.filter(
+        (w) => !foundWeights.includes(w)
+      );
       return res.status(400).json({
-        message: 'Missing required fields.',
         success: false,
+        message: `Invalid weights provided: ${missingWeights.join(', ')}`,
       });
     }
 
-    // Check if the category exists
+    // Fetch IDs for RAMs and Sizes
+    const ramDocs = await ProductRams.find({ ramName: { $in: ramNames } });
+    const ramIds = ramDocs.map((doc) => doc._id);
+
+    const sizeDocs = await ProductSize.find({ sizeName: { $in: sizeNames } });
+    const sizeIds = sizeDocs.map((doc) => doc._id);
+
+    // Validate category and sub-category existence
     const existingCategory = await Category.findById(category);
     if (!existingCategory) {
+      return res
+        .status(400)
+        .json({ success: false, message: 'Invalid category.' });
+    }
+
+    const existingSubCategory = await SubCategory.findById(subCat);
+    if (!existingSubCategory) {
+      return res
+        .status(400)
+        .json({ success: false, message: 'Invalid sub-category.' });
+    }
+
+    // Calculate price based on oldPrice and discount
+    if (discount < 0 || discount > 100) {
       return res.status(400).json({
-        message: 'Invalid category selected.',
         success: false,
+        message: 'Discount must be between 0 and 100.',
       });
     }
+
+    const price = oldPrice - (oldPrice * discount) / 100;
+    console.log(`Calculated Price: ${price} from OldPrice: ${oldPrice} and Discount: ${discount}%`);
 
     // Create new product
     const newProduct = new Products({
@@ -175,150 +406,168 @@ router.post('/create', upload.array('images'), async (req, res) => {
       description,
       images: imgUrls,
       brand,
-      price,
       oldPrice,
+      price,
       category,
+      subCat,
       countInStock,
-      rating: rating || 0, // Default to 0 if no rating is provided
-      isFeatured: isFeatured || false, // Default to false if not provided
+      rating: rating || 0,
+      isFeatured: isFeatured || false,
+      discount,
+      weightName: weightIds, // Array of ObjectId for weights
+      ramName: ramIds, // Array of ObjectId for RAMs
+      sizeName: sizeIds, // Array of ObjectId for Sizes
     });
 
-    // Save the product to the database
     const savedProduct = await newProduct.save();
+    console.log('Product saved successfully:', savedProduct);
 
-    // Respond with success message
     return res.status(201).json({
+      success: true,
       message: 'Product created successfully.',
       product: savedProduct,
-      success: true,
     });
-  } catch (err) {
-    // Handle errors
-    console.error('Error creating product:', err);
-    return res.status(500).json({
-      message: err.message || 'Internal server error.',
+  } catch (error) {
+    console.error('Error creating product:', error.message);
+    res.status(500).json({
       success: false,
+      message: 'Server error.',
+      error: error.message,
     });
   }
 });
+
 
 router.put('/:id', upload.array('images'), async (req, res) => {
   try {
-    // Step 1: Retrieve the existing product by ID
-    const existingProduct = await Products.findById(req.params.id);
-    if (!existingProduct) {
-      return res.status(404).json({ message: 'Product not found' });
+    // Find the product by ID
+    const product = await Products.findById(req.params.id);
+    if (!product) {
+      return res.status(404).json({
+        success: false,
+        message: 'Product not found.',
+      });
     }
 
-    // Step 2: Handle images
-    const newImages = req.files || []; // New images uploaded from form
-    const retainedImages = req.body.retainedImages || []; // Retained image URLs (sent from the frontend)
+    // Upload new images if any
+    const uploadStatus = await uploadImages(req.files);
+    const newImageUrls = uploadStatus
+      .filter((item) => item.success)
+      .map((item) => item.url);
 
-    let updatedImages = [...retainedImages]; // Start with retained images
+    // Validate the updated fields
+    const {
+      name,
+      price,
+      category,
+      subCat,
+      description,
+      brand,
+      oldPrice,
+      countInStock,
+      rating,
+      isFeatured,
+      discount,
+      weightName,
+      ramName,
+      sizeName,
+    } = req.body;
 
-    // Step 3: If there are new images, upload them to Cloudinary
-    if (newImages.length > 0) {
-      const uploadStatus = await Promise.allSettled(
-        newImages.map((image) =>
-          limit(() =>
-            cloudinary.uploader
-              .upload(image.path)
-              .then((result) => {
-                fs.unlinkSync(image.path); // Delete file after upload
-                return {
-                  success: true,
-                  url: result.url,
-                  publicId: result.public_id,
-                };
-              })
-              .catch((error) => ({ success: false, error: error.message }))
-          )
-        )
-      );
-
-      // Step 4: Filter successful uploads and add them to the updated images list
-      const successfulUploads = uploadStatus
-        .filter((result) => result.status === 'fulfilled')
-        .map((result) => result.value.url);
-
-      updatedImages = [...updatedImages, ...successfulUploads]; // Add new images to the list of updated images
+    // Validate category and sub-category (same as in POST)
+    const existingCategory = await Category.findById(category);
+    if (!existingCategory) {
+      return res
+        .status(400)
+        .json({ success: false, message: 'Invalid category.' });
     }
 
-    // Step 5: Handle category validation
-    const category = req.body.category || existingProduct.category;
-    const isValidCategory = await Category.findById(category);
-    if (!isValidCategory) {
-      return res.status(400).json({ message: 'Invalid category selected.' });
+    const existingSubCategory = await SubCategory.findById(subCat);
+    if (!existingSubCategory) {
+      return res
+        .status(400)
+        .json({ success: false, message: 'Invalid sub-category.' });
     }
 
-    // Step 6: Update product details
+    const existingWeight = await ProductWeigth.findById(weightName);
+    if (!existingWeight) {
+      return res
+        .status(400)
+        .json({ success: false, message: 'Invalid weight selected.' });
+    }
+
+    const existingRam = await ProductRams.findById(ramName);
+    if (!existingRam) {
+      return res
+        .status(400)
+        .json({ success: false, message: 'Invalid RAM selected.' });
+    }
+
+    const existingSize = await ProductSize.findById(sizeName);
+    if (!existingSize) {
+      return res
+        .status(400)
+        .json({ success: false, message: 'Invalid size selected.' });
+    }
+
+    // Update the product
     const updatedProduct = await Products.findByIdAndUpdate(
       req.params.id,
       {
-        name: req.body.name || existingProduct.name,
-        images: updatedImages,
-        price: req.body.price || existingProduct.price,
-        description: req.body.description || existingProduct.description,
-        category: category,
-        brand: req.body.brand || existingProduct.brand,
-        oldPrice: req.body.oldPrice || existingProduct.oldPrice,
-        countInStock: req.body.countInStock || existingProduct.countInStock,
-        rating: req.body.rating || existingProduct.rating,
-        isFeatured: req.body.isFeatured || existingProduct.isFeatured,
+        name,
+        description,
+        images: newImageUrls, // Keep old images if no new ones
+        brand,
+        price,
+        oldPrice,
+        category,
+        subCat,
+        countInStock,
+        rating: rating || product.rating,
+        isFeatured: isFeatured || product.isFeatured,
+        discount,
+        weightName,
+        ramName,
+        sizeName,
       },
-      { new: true } // Return the updated product
+      { new: true, runValidators: true }
     );
 
-    // Step 7: Return the updated product
-    res.status(200).json({
-      message: 'Product updated successfully',
+    return res.status(200).json({
+      success: true,
+      message: 'Product updated successfully.',
       product: updatedProduct,
     });
   } catch (error) {
-    // Handle errors
-    console.error('Error updating product:', error);
-    res
-      .status(500)
-      .json({ message: 'Error updating product', error: error.message });
+    console.error('Error updating product:', error.message);
+    res.status(500).json({
+      success: false,
+      message: 'Server error.',
+      error: error.message,
+    });
   }
 });
-
-// Route to delete a product
+// Delete product route
 router.delete('/:id', async (req, res) => {
   try {
     const product = await Products.findById(req.params.id);
-    const images = product.images;
-
-    for (const imagePath of images) {
-      const localFileName = imagePath.split('/').pop(); // Lấy tên file từ đường dẫn
-      const localPath = `uploads/${localFileName}`; // Tạo đường dẫn cục bộ tới file
-
-      try {
-        if (fs.existsSync(localPath)) {
-          fs.unlinkSync(localPath); // Xóa file từ thư mục uploads nếu tồn tại
-        }
-      } catch (error) {
-        console.error('Lỗi khi xóa ảnh cục bộ:', error.message);
-      }
+    if (!product) {
+      return res.status(404).json({ message: 'Product not found to delete' });
     }
-    // Xóa ảnh trên Cloudinary
-    const cloudinaryDeletionPromises = images.map(async (image) => {
-      const publicId = image.publicId || image.split('/').pop().split('.')[0]; // Sử dụng public_id hoặc lấy từ URL
+
+    const cloudinaryDeletionPromises = product.images.map(async (image) => {
+      const publicId = image.split('/').pop().split('.')[0];
       if (publicId) {
         try {
-          await cloudinary.uploader.destroy(publicId); // Xóa ảnh từ Cloudinary bằng publicId
+          await cloudinary.uploader.destroy(publicId);
         } catch (error) {
-          console.error('Lỗi khi xóa ảnh trên Cloudinary:', error.message);
+          console.error('Error deleting image on Cloudinary:', error.message);
         }
       }
     });
 
     await Promise.all(cloudinaryDeletionPromises);
+    await Products.findByIdAndDelete(req.params.id);
 
-    const deleteProduct = await Products.findByIdAndDelete(req.params.id);
-    if (!deleteProduct) {
-      return res.status(404).json({ message: 'Product not found to delete' });
-    }
     res.status(200).json({ message: 'Product deleted successfully' });
   } catch (error) {
     res

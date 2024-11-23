@@ -3,6 +3,12 @@
   overflow: hidden;
 }
 
+.homeCat .container {
+  background-color: #fefdfd;
+  padding: 30px;
+  box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+}
+
 .homeCat .swiper .item {
   padding: 15px;
   width: 100%;
