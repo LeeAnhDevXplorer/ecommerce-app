@@ -102,7 +102,16 @@ router.get('/', async (req, res) => {
   }
 });
 
-// Route to get a single product by ID
+router.get("/featured", async (req, res) => {
+  const productList = await Products.find({isFeatured: true
+  })
+  if(!productList) {
+    res.status(500).json({success: false})
+  }
+
+  return res.status(200).json(productList)
+})
+
 router.get('/:id', async (req, res) => {
   try {
     const product = await Products.findById(req.params.id)
