@@ -1,11 +1,13 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
-import Button from "@mui/material/Button";
-import { RiMenu2Fill } from "react-icons/ri";
-import { FaAngleDown } from "react-icons/fa6";
-import { FaAngleRight } from "react-icons/fa";
-import "./Navigation.css";
-const Navigation = () => {
+import Button from '@mui/material/Button';
+import React, { useContext, useState } from 'react';
+import { FaAngleRight } from 'react-icons/fa';
+import { FaAngleDown } from 'react-icons/fa6';
+import { RiMenu2Fill } from 'react-icons/ri';
+import { Link } from 'react-router-dom';
+import { MyContext } from '../../../App';
+import './Navigation.css';
+const Navigation = (props) => {
+  const context = useContext(MyContext);
   const [isopenSidebarVal, setisopenSidebarVal] = useState(false);
   return (
     <nav>
@@ -27,157 +29,32 @@ const Navigation = () => {
               </Button>
               <div
                 className={`sidebarNav ${
-                  isopenSidebarVal === true ? "open" : ""
+                  isopenSidebarVal === true ? 'open' : ''
                 }`}
               >
                 <ul>
-                  <li>
-                    <Link to="/">
-                      <Button>
-                        Men <FaAngleRight className="ml-auto" />
-                      </Button>
-                    </Link>
-                    <div className="submenu">
-                      <Link to="/">
-                        <Button>Men</Button>
-                      </Link>
-                      <Link to="/">
-                        <Button>Women</Button>
-                      </Link>
-                      <Link to="/">
-                        <Button>Boys</Button>
-                      </Link>
-                      <Link to="/">
-                        <Button>Girls</Button>
-                      </Link>
-                    </div>
-                  </li>
-                  <li>
-                    <Link to="/">
-                      <Button>
-                        Women <FaAngleRight className="ml-auto" />
-                      </Button>
-                    </Link>
-                    <div className="submenu">
-                      <Link to="/">
-                        <Button>Men</Button>
-                      </Link>
-                      <Link to="/">
-                        <Button>Women</Button>
-                      </Link>
-                      <Link to="/">
-                        <Button>Boys</Button>
-                      </Link>
-                      <Link to="/">
-                        <Button>Girls</Button>
-                      </Link>
-                    </div>
-                  </li>
-                  <li>
-                    <Link to="/">
-                      <Button>
-                        Bag <FaAngleRight className="ml-auto" />
-                      </Button>
-                    </Link>
-                    <div className="submenu">
-                      <Link to="/">
-                        <Button>Men</Button>
-                      </Link>
-                      <Link to="/">
-                        <Button>Women</Button>
-                      </Link>
-                      <Link to="/">
-                        <Button>Boys</Button>
-                      </Link>
-                      <Link to="/">
-                        <Button>Girls</Button>
-                      </Link>
-                    </div>
-                  </li>
-                  <li>
-                    <Link to="/">
-                      <Button>
-                        Watches <FaAngleRight className="ml-auto" />
-                      </Button>
-                    </Link>
-                    <div className="submenu">
-                      <Link to="/">
-                        <Button>Men</Button>
-                      </Link>
-                      <Link to="/">
-                        <Button>Women</Button>
-                      </Link>
-                      <Link to="/">
-                        <Button>Boys</Button>
-                      </Link>
-                      <Link to="/">
-                        <Button>Girls</Button>
-                      </Link>
-                    </div>
-                  </li>
-                  <li>
-                    <Link to="/">
-                      <Button>
-                        Beauty <FaAngleRight className="ml-auto" />
-                      </Button>
-                    </Link>
-                    <div className="submenu">
-                      <Link to="/">
-                        <Button>Men</Button>
-                      </Link>
-                      <Link to="/">
-                        <Button>Women</Button>
-                      </Link>
-                      <Link to="/">
-                        <Button>Boys</Button>
-                      </Link>
-                      <Link to="/">
-                        <Button>Girls</Button>
-                      </Link>
-                    </div>
-                  </li>
-                  <li>
-                    <Link to="/">
-                      <Button>
-                        Điện thoại <FaAngleRight className="ml-auto" />
-                      </Button>
-                    </Link>
-                    <div className="submenu">
-                      <Link to="/">
-                        <Button>Men</Button>
-                      </Link>
-                      <Link to="/">
-                        <Button>Women</Button>
-                      </Link>
-                      <Link to="/">
-                        <Button>Boys</Button>
-                      </Link>
-                      <Link to="/">
-                        <Button>Girls</Button>
-                      </Link>
-                    </div>
-                  </li>
-                  <li>
-                    <Link to="/">
-                      <Button>
-                        Laptop <FaAngleRight className="ml-auto" />
-                      </Button>
-                    </Link>
-                    <div className="submenu">
-                      <Link to="/">
-                        <Button>Men</Button>
-                      </Link>
-                      <Link to="/">
-                        <Button>Women</Button>
-                      </Link>
-                      <Link to="/">
-                        <Button>Boys</Button>
-                      </Link>
-                      <Link to="/">
-                        <Button>Girls</Button>
-                      </Link>
-                    </div>
-                  </li>
+                  {props.navData?.length !== 0 &&
+                    props.navData?.map((item, index) => {
+                      return (
+                        <li key={index}>
+                          <Link to="/">
+                            <Button>
+                              {item?.name} <FaAngleRight className="ml-auto" />
+                            </Button>
+                          </Link>
+                          <div className="submenu">
+                            {context.subCatData?.length !== 0 &&
+                              context.subCatData?.map((item, index) => {
+                                return (
+                                  <Link to="/" key={index}>
+                                    <Button>{item.subCat}</Button>
+                                  </Link>
+                                );
+                              })}
+                          </div>
+                        </li>
+                      );
+                    })}
                 </ul>
               </div>
             </div>
@@ -189,139 +66,26 @@ const Navigation = () => {
                   <Button> Home </Button>
                 </Link>
               </li>
-              <li className="list-inline-item">
-                <Link to="/">
-                  <Button> Thời trang </Button>
-                </Link>
-                <div className="submenu shadow">
-                  <Link to="/">
-                    <Button>Men</Button>
-                  </Link>
-                  <Link to="/">
-                    <Button>Women</Button>
-                  </Link>
-                  <Link to="/">
-                    <Button>Boys</Button>
-                  </Link>
-                  <Link to="/">
-                    <Button>Girls</Button>
-                  </Link>
-                </div>
-              </li>
-              <li className="list-inline-item">
-                <Link to="/">
-                  <Button> Điện tử </Button>
-                </Link>
-                <div className="submenu shadow">
-                  <Link to="/">
-                    <Button>Men</Button>
-                  </Link>
-                  <Link to="/">
-                    <Button>Women</Button>
-                  </Link>
-                  <Link to="/">
-                    <Button>Boys</Button>
-                  </Link>
-                  <Link to="/">
-                    <Button>Girls</Button>
-                  </Link>
-                </div>
-              </li>
-              <li className="list-inline-item">
-                <Link to="/">
-                  <Button> Hàng tạp hóa </Button>
-                </Link>
-                <div className="submenu shadow">
-                  <Link to="/">
-                    <Button>Men</Button>
-                  </Link>
-                  <Link to="/">
-                    <Button>Women</Button>
-                  </Link>
-                  <Link to="/">
-                    <Button>Boys</Button>
-                  </Link>
-                  <Link to="/">
-                    <Button>Girls</Button>
-                  </Link>
-                </div>
-              </li>
-              <li className="list-inline-item">
-                <Link to="/">
-                  <Button> Giày dép </Button>
-                </Link>
-                <div className="submenu shadow">
-                  <Link to="/">
-                    <Button>Men</Button>
-                  </Link>
-                  <Link to="/">
-                    <Button>Women</Button>
-                  </Link>
-                  <Link to="/">
-                    <Button>Boys</Button>
-                  </Link>
-                  <Link to="/">
-                    <Button>Girls</Button>
-                  </Link>
-                </div>
-              </li>
-              <li className="list-inline-item">
-                <Link to="/">
-                  <Button> Sắc đẹp </Button>
-                </Link>
-                <div className="submenu shadow">
-                  <Link to="/">
-                    <Button>Men</Button>
-                  </Link>
-                  <Link to="/">
-                    <Button>Women</Button>
-                  </Link>
-                  <Link to="/">
-                    <Button>Boys</Button>
-                  </Link>
-                  <Link to="/">
-                    <Button>Girls</Button>
-                  </Link>
-                </div>
-              </li>
-              <li className="list-inline-item">
-                <Link to="/">
-                  <Button> Sức khỏe </Button>
-                </Link>
-                <div className="submenu shadow">
-                  <Link to="/">
-                    <Button>Men</Button>
-                  </Link>
-                  <Link to="/">
-                    <Button>Women</Button>
-                  </Link>
-                  <Link to="/">
-                    <Button>Boys</Button>
-                  </Link>
-                  <Link to="/">
-                    <Button>Girls</Button>
-                  </Link>
-                </div>
-              </li>
-              <li className="list-inline-item">
-                <Link to="/">
-                  <Button> Túi xách </Button>
-                </Link>
-                <div className="submenu shadow">
-                  <Link to="/">
-                    <Button>Men</Button>
-                  </Link>
-                  <Link to="/">
-                    <Button>Women</Button>
-                  </Link>
-                  <Link to="/">
-                    <Button>Boys</Button>
-                  </Link>
-                  <Link to="/">
-                    <Button>Girls</Button>
-                  </Link>
-                </div>
-              </li>
+              {props.navData?.length !== 0 &&
+                props.navData?.map((item, index) => {
+                  return (
+                    <li className="list-inline-item" key={index}>
+                      <Link to="/">
+                        <Button> {item?.name} </Button>
+                      </Link>
+                      <div className="submenu shadow">
+                        {context.subCatData?.length !== 0 &&
+                          context.subCatData?.map((item, index) => {
+                            return (
+                              <Link to="/" key={index}>
+                                <Button>{item.subCat}</Button>
+                              </Link>
+                            );
+                          })}
+                      </div>
+                    </li>
+                  );
+                })}
             </ul>
           </div>
         </div>

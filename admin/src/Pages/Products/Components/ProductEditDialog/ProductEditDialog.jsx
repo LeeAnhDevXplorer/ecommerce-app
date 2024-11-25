@@ -56,6 +56,7 @@ const ProductEditDialog = ({
   onChangeFile,
   removeFile,
   handleSelectChange,
+  selectCat,
 }) => {
   const theme = useTheme();
   const [loading, setLoading] = useState(false);
@@ -303,7 +304,11 @@ const ProductEditDialog = ({
                       <CircularProgress size={24} />
                     ) : (
                       catData.map((item, index) => (
-                        <MenuItem key={index} value={item._id}>
+                        <MenuItem
+                          key={index}
+                          value={item._id}
+                          onClick={() => selectCat(item.name)}
+                        >
                           {item.name}
                         </MenuItem>
                       ))

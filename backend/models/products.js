@@ -27,6 +27,14 @@ const productSchema = new mongoose.Schema({
     type: Number, // Giá cũ nhập từ người dùng
     required: true,
   },
+  catName: {
+    type: String,
+    default: '',
+  },
+  subName: {
+    type: String,
+    default: '',
+  },
   category: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Category',

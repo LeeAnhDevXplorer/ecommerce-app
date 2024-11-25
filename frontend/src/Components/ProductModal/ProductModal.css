@@ -1,7 +1,7 @@
 .productModal .MuiPaper-elevation {
   padding: 25px;
-  max-width: 900px;
-  width: 900px;
+  max-width: 1200px;
+  width: 1150px;
   position: relative;
 }
 
@@ -163,9 +163,9 @@ button {
 
 .swiper-button-prev,
 .swiper-button-next {
-  top: 75px;
-  width: 35px;
-  height: 35px;
+  top: 30px;
+  width: 24px;
+  height: 24px;
   background-color: #f2f2f2;
   box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px;
   border-radius: 100%;

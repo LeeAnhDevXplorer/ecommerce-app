@@ -82,6 +82,7 @@ const ProductUpload = () => {
     oldPrice: '',
     category: '',
     subCat: '',
+    catName: '',
     countInStock: '',
     discount: 0,
     weightName: [],
@@ -195,6 +196,10 @@ const ProductUpload = () => {
     }));
   };
 
+  const selectCat = (cat) => {
+    formFields.catName = cat
+  };
+
   const addProduct = async (event) => {
     event.preventDefault();
     setLoading(true);
@@ -203,6 +208,7 @@ const ProductUpload = () => {
       name,
       category,
       subCat,
+      catName,
       description,
       brand,
       oldPrice,
@@ -230,6 +236,7 @@ const ProductUpload = () => {
       fd.append('name', name);
       fd.append('category', category._id || category);
       fd.append('subCat', subCat._id || subCat);
+      fd.append("catName", formFields.catName);
       fd.append('description', description || '');
       fd.append('brand', brand || '');
       fd.append('oldPrice', oldPrice);
@@ -345,7 +352,11 @@ const ProductUpload = () => {
                         <MenuItem disabled>Không tìm thấy danh mục</MenuItem>
                       ) : (
                         catData.map((item, index) => (
-                          <MenuItem key={index} value={item._id}>
+                          <MenuItem
+                            key={index}
+                            value={item._id}
+                            onClick={() => selectCat(item.name)}
+                          >
                             {item.name}
                           </MenuItem>
                         ))

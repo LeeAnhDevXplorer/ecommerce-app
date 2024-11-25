@@ -36,7 +36,7 @@ const Header = () => {
                 <SearchBox />
                 <div className="d-flex align-items-center part3 ml-auto">
                   {context.isLogin !== true ? (
-                    <Link to={"/SignIn"}>
+                    <Link to={'/SignIn'}>
                       <Button className="btn-blue btnlg btn-big btn-round mr-4">
                         Sign In
                       </Button>
@@ -67,7 +67,7 @@ const Header = () => {
             </div>
           </div>
         </header>
-        <Navigation />
+        {context.catData?.length !== 0 && <Navigation navData={context.catData}/>}
       </div>
     </>
   );

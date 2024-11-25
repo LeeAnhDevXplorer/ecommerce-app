@@ -1,11 +1,18 @@
 import mongoose from 'mongoose';
 
-const productRamsSchema = mongoose.Schema({
-  ramName: {
-    type: String,
-    default: null,
+const productRamsSchema = mongoose.Schema(
+  {
+    ramName: {
+      type: String,
+      required: true,
+      trim: true,
+      unique: true,
+    },
   },
-});
+  {
+    timestamps: true,
+  }
+);
 
 productRamsSchema.virtual('id').get(function () {
   return this._id.toHexString();

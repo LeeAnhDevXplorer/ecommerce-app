@@ -48,6 +48,7 @@ const Products = () => {
     oldPrice: '',
     category: '',
     subCat: '',
+    catName: '',
     countInStock: '',
     discount: '',
     weightName: [],
@@ -174,6 +175,10 @@ const Products = () => {
     }));
   };
 
+  const selectCat = (cat) => {
+    formFields.catName = cat;
+  };
+
   const handlePageChange = (event, value) => {
     setCurrentPage(value); // Update the current page
     fetchProducts(value); // Fetch products for the selected page
@@ -199,6 +204,7 @@ const Products = () => {
           oldPrice: res.oldPrice || '',
           category: res.category ? res.category.name : '',
           subCat: res.subCat || '',
+          catName: res.catName || '',
           countInStock: res.countInStock || '',
           isFeatured: res.isFeatured || false,
           discount: res.discount || '',
@@ -240,6 +246,7 @@ const Products = () => {
       formData.append('oldPrice', Number(formFields.oldPrice) || 0);
       formData.append('category', formFields.category?.trim() || '');
       formData.append('subCat', formFields.subCat?.trim() || '');
+      formData.append('catName', formFields.catName || '');
       formData.append('countInStock', Number(formFields.countInStock) || 0);
       formData.append('discount', formFields.discount || 0);
       formData.append('isFeatured', Boolean(formFields.isFeatured));
@@ -461,6 +468,7 @@ const Products = () => {
           onChangeFile={onChangeFile}
           removeFile={removeFile}
           handleSelectChange={handleSelectChange}
+          selectCat={selectCat}
         />
       </div>
     </div>

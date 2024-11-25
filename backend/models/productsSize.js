@@ -3,7 +3,7 @@ import mongoose from 'mongoose';
 const productSizeSchema = new mongoose.Schema(
   {
     sizeName: {
-      type: String,
+      type: String, 
       required: [true, 'Tên kích thước là bắt buộc'],
       trim: true,
       unique: true,

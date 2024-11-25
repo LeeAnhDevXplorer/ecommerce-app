@@ -102,15 +102,14 @@ router.get('/', async (req, res) => {
   }
 });
 
-router.get("/featured", async (req, res) => {
-  const productList = await Products.find({isFeatured: true
-  })
-  if(!productList) {
-    res.status(500).json({success: false})
+router.get('/featured', async (req, res) => {
+  const productList = await Products.find({ isFeatured: true });
+  if (!productList) {
+    res.status(500).json({ success: false });
   }
 
-  return res.status(200).json(productList)
-})
+  return res.status(200).json(productList);
+});
 
 router.get('/:id', async (req, res) => {
   try {
@@ -152,6 +151,8 @@ router.post('/create', upload.array('images'), async (req, res) => {
       name,
       category,
       subCat,
+      catName,
+      subName,
       description,
       brand,
       oldPrice,
@@ -209,6 +210,8 @@ router.post('/create', upload.array('images'), async (req, res) => {
       price: oldPrice * (1 - discount / 100), // Calculate price
       category,
       subCat,
+      catName,
+      subName,
       countInStock,
       discount,
       weightName: weightIds,
@@ -262,6 +265,8 @@ router.put('/:id', upload.array('images'), async (req, res) => {
         oldPrice: req.body.oldPrice || product.oldPrice,
         category: req.body.category || product.category,
         subCat: req.body.subCat || product.subCat,
+        catName: req.body.catName || product.catName,
+        subName: req.body.subName || product.subName,
         countInStock: req.body.countInStock || product.countInStock,
         discount: req.body.discount || product.discount,
 

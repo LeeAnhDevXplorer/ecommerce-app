@@ -10,25 +10,24 @@ import './ProductItem.css';
 const ProductItem = (props) => {
   const context = useContext(MyContext);
 
-  const viewProductDetails = (id) => {
-    context.setisOpenProductModal(true);
+  const viewProductDetails = (_id) => {
+    context.setisOpenProductModal({
+      id: _id,
+      open: true
+    });
   };
-
-  // const closeProductModal = () => {
-  //   context.setisOpenProductModal(false);
-  // };
   return (
     <>
       <div className={`productItem ${props.itemView}`}>
         <div className="imgWrapper">
           <img
-            src={props.item?.images[2]}
+            src={props.item?.images[0]}
             alt=""
             className="w-100 img_rapper"
           />
-          <div className="badge badge-primary">{props.item?.discount}</div>
+          <div className="badge badge-primary">{props.item?.discount}%</div>
           <div className="actions">
-            <Button onClick={() => viewProductDetails(1)}>
+            <Button onClick={() => viewProductDetails(props.item?._id)}>
               <BsArrowsFullscreen />
             </Button>
             <Button>
@@ -37,7 +36,7 @@ const ProductItem = (props) => {
           </div>
         </div>
         <div className="info">
-          <h4>{props.item?.name.substr(0, 45) + '...'}</h4>
+          <h4>{props.item?.name.substr(0, 30) + '...'}</h4>
           <span className="stock text-success d-block">In Stock</span>
           <Rating
             name="read-only"

@@ -47,19 +47,14 @@ const ProductModal = (props) => {
         >
           <IoIosCloseCircleOutline />
         </Button>
-        <h4 className="mb-1 font-weight-bold">
-          All Natural Italian-Style Chicken Meatballs
-        </h4>
+        <h4 className="mb-1 font-weight pr-5">{props?.data?.name}</h4>
         <div className="d-flex align-items-center">
           <div className="d-flex align-items-center mr-4">
-            <span>Brands: </span>
-            <span className="ml-2">
-              <b>Welch's</b>
-            </span>
+            <span>Brands: {props?.data?.brand}</span>
           </div>
           <Rating
             name="read-only"
-            value={5}
+            value={parseInt(props?.data?.rating)}
             readOnly
             size="small"
             precision={0.5}
@@ -71,28 +66,24 @@ const ProductModal = (props) => {
 
         <div className="row mt-2 productDetailsModal">
           <div className="col-md-5">
-            <ProductZoom />
+            <ProductZoom images={props?.data?.images} discount={props?.data?.discount}/>
           </div>
           <div className="col-md-7">
             <div className="d-flex info align-items-center mb-3">
-              <span className="oldPrice mr-2">$222.0</span>
-              <span className="netPrice text-danger">$99.0</span>
+              <span className="oldPrice mr-2">đ{props?.data?.oldPrice}</span>
+              <span className="netPrice text-danger">đ{props?.data?.price}</span>
             </div>
             <span className="badge bg-success">IN STOCK</span>
-            <p className="mt-3">
-              Vivamus adipiscing nisl ut dolor dignissim semper. Nulla luctus
-              malesuada tincidunt. Class aptent taciti sociosqu ad litora
-              torquent
-            </p>
+            <p className="mt-3">{props?.data?.description}</p>
             <div className="d-flex info align-items-center">
               <QuantityBox />
               <div className="btn-blue pt-1 btn-round ml-3">
-              <Button
-                  className={`cart-btn ${clicked ? "clicked" : ""}`}
+                <Button
+                  className={`cart-btn ${clicked ? 'clicked' : ''}`}
                   onClick={handleClick}
                 >
                   <span className="btn-blue btn-lg btn-big btn-round add-to-cart">
-                    {clicked ? "Thêm thành công" : "Thêm vào giỏ hàng"}
+                    {clicked ? 'Thêm thành công' : 'Thêm vào giỏ hàng'}
                   </span>
                   {clicked && <span className="added">Thêm thành công</span>}
                   <FaCartShopping className="icon1" />
