@@ -214,7 +214,7 @@ const ProductEditDialog = ({
             ></textarea>
             <div className="grid grid-cols-4 gap-4">
               <div>
-                <TextField
+                {/* <TextField
                   required
                   id="outlined-required"
                   label="Giá mới"
@@ -224,6 +224,16 @@ const ProductEditDialog = ({
                   name="price"
                   value={formFields.price} // giữ `value` để làm controlled component
                   onChange={changeInput}
+                /> */}
+                <TextField
+                  fullWidth
+                  className="mb-4"
+                  id="outlined-required"
+                  type="text"
+                  label="Giảm giá (%)"
+                  name="discount"
+                  onChange={changeInput}
+                  value={formFields.discount}
                 />
               </div>
               <div className="">

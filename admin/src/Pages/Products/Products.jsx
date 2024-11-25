@@ -49,7 +49,7 @@ const Products = () => {
     category: '',
     subCat: '',
     countInStock: '',
-    discount: 0,
+    discount: '',
     weightName: [],
     ramName: [],
     sizeName: [],
@@ -201,6 +201,7 @@ const Products = () => {
           subCat: res.subCat || '',
           countInStock: res.countInStock || '',
           isFeatured: res.isFeatured || false,
+          discount: res.discount || '',
           weightName: res.weightName ? res.weightName.join(',') : '', // Gán mảng weightName vào chuỗi
           ramName: res.ramName ? res.ramName.join(',') : '', // Gán mảng ramName vào chuỗi
           sizeName: res.sizeName ? res.sizeName.join(',') : '', // Gán mảng sizeName vào chuỗi
@@ -218,7 +219,11 @@ const Products = () => {
   const editPFun = async (e) => {
     e.preventDefault();
     setLoading(true);
-    context.setProgress(30);
+
+    // Calculate the updated price from oldPrice and discount
+    const updatedPrice =
+      Number(formFields.oldPrice) -
+      (Number(formFields.oldPrice) * (Number(formFields.discount) || 0)) / 100;
 
     try {
       const formData = new FormData();
@@ -227,86 +232,56 @@ const Products = () => {
       console.log('ramName:', formFields.ramName);
       console.log('sizeName:', formFields.sizeName);
 
-      // Kiểm tra và chuyển đổi giá trị trước khi append
+      // Append fields to formData, ensuring values are valid
       formData.append('name', formFields.name?.trim() || '');
       formData.append('description', formFields.description?.trim() || '');
       formData.append('brand', formFields.brand?.trim() || '');
-      formData.append('price', Number(formFields.price) || 0);
+      formData.append('price', updatedPrice || 0); // Updated price after discount
       formData.append('oldPrice', Number(formFields.oldPrice) || 0);
       formData.append('category', formFields.category?.trim() || '');
       formData.append('subCat', formFields.subCat?.trim() || '');
       formData.append('countInStock', Number(formFields.countInStock) || 0);
+      formData.append('discount', formFields.discount || 0);
       formData.append('isFeatured', Boolean(formFields.isFeatured));
 
-      // Thêm các trường weightName, ramName, sizeName vào formData
-      if (formFields.weightName) {
+      // Append weightName, ramName, sizeName if available
+      if (formFields.weightName)
         formData.append('weightName', formFields.weightName);
-      }
-      if (formFields.ramName) {
-        formData.append('ramName', formFields.ramName);
-      }
-      if (formFields.sizeName) {
-        formData.append('sizeName', formFields.sizeName);
-      }
+      if (formFields.ramName) formData.append('ramName', formFields.ramName);
+      if (formFields.sizeName) formData.append('sizeName', formFields.sizeName);
 
-      // Xử lý hình ảnh hiện có
+      // Handle existing images (if any)
       const existingImages = previews.filter(
         (preview) => typeof preview === 'string' && preview.startsWith('http')
       );
-
       if (existingImages.length > 0) {
-        existingImages.forEach((image) => {
-          formData.append('existingImages[]', image); // Thêm [] để xử lý array
-        });
+        existingImages.forEach((image) =>
+          formData.append('existingImages[]', image)
+        ); // Array handling for multiple images
       }
 
-      // Xử lý hình ảnh mới
+      // Handle new images (if any)
       if (files.length > 0) {
         files.forEach((file) => {
-          if (file instanceof File) {
-            formData.append('images', file);
-          }
+          if (file instanceof File) formData.append('images', file); // Append each image
         });
       }
 
-      // Log formData để debug
-      for (let pair of formData.entries()) {
-        console.log(pair[0] + ': ' + pair[1]);
-      }
-
-      context.setProgress(50);
-
-      const response = await editData(`/api/products/${EditP}`, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
-
-      context.setProgress(70);
-
-      if (response && response.data) {
-        setPreviews([]);
-        setFiles([]);
-        await fetchProducts();
-        handleClose();
-
+      // Make API request to update product
+      await editData(`/api/products/${EditP}`, formData).then(async (res) => {
+        setLoading(false);
+        setPreviews([]); // Clear previews after successful update
+        setFiles([]); // Clear file inputs
+        await fetchProducts(); // Fetch updated product list
+        handleClose(); // Close the modal or dialog
         context.setAlertBox({
           error: false,
           msg: 'Product updated successfully',
           open: true,
         });
-      }
-      context.setProgress(100);
+      });
     } catch (error) {
       console.error('Error updating product:', error);
-
-      // Log chi tiết lỗi
-      if (error.response) {
-        console.error('Error response:', error.response.data);
-        console.error('Error status:', error.response.status);
-        console.error('Error headers:', error.response.headers);
-      }
-
       context.setAlertBox({
         error: true,
         msg:
@@ -315,9 +290,8 @@ const Products = () => {
           'Failed to update product',
         open: true,
       });
-      context.setProgress(0);
     } finally {
-      setLoading(false);
+      setLoading(false); // Always stop the loading state after the process is complete
     }
   };
 
