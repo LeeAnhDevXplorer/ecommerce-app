@@ -26,7 +26,7 @@ const ProductItem = (props) => {
             alt=""
             className="w-100 img_rapper"
           />
-          <div className="badge badge-primary">28%</div>
+          <div className="badge badge-primary">{props.item?.discount}</div>
           <div className="actions">
             <Button onClick={() => viewProductDetails(1)}>
               <BsArrowsFullscreen />
