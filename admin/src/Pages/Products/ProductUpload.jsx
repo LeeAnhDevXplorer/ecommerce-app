@@ -8,9 +8,7 @@ import {
   Chip,
   CircularProgress,
   FormControl,
-  InputLabel,
   MenuItem,
-  OutlinedInput,
   Select,
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
@@ -92,7 +90,7 @@ const ProductUpload = () => {
     isFeatured: false,
   });
 
-  // Fetch danh mục sản phẩm khi component được render
+  // Lấy danh mục sản phẩm khi component được render
   useEffect(() => {
     setLoading(true);
     fetchDataFromApi('/api/category')
@@ -104,13 +102,14 @@ const ProductUpload = () => {
         }
       })
       .catch((error) => {
-        console.error('Error fetching categories:', error);
+        console.error('Lỗi khi lấy danh mục:', error);
         setCatData([]);
       })
       .finally(() => {
         setLoading(false);
       });
   }, []);
+
   useEffect(() => {
     const fetchAllData = async () => {
       setLoading(true);
@@ -124,7 +123,7 @@ const ProductUpload = () => {
         setPWeigthData(weights.data || []);
         setPSizeData(sizes.data || []);
       } catch (error) {
-        console.error('Error fetching data:', error);
+        console.error('Lỗi khi lấy dữ liệu:', error);
       } finally {
         setLoading(false);
       }
@@ -134,9 +133,9 @@ const ProductUpload = () => {
   }, []);
 
   useEffect(() => {
-    // Hàm fetch dữ liệu subCategory từ API
+    // Hàm lấy dữ liệu subCategory từ API
     const fetchSubCategories = async () => {
-      setLoading(true); // Đặt loading = true khi bắt đầu fetch
+      setLoading(true); // Bắt đầu fetch dữ liệu
       try {
         await fetchDataFromApi('/api/subCategory').then((res) => {
           // Kiểm tra và lưu dữ liệu vào state
@@ -147,19 +146,19 @@ const ProductUpload = () => {
           }
         });
       } catch (error) {
-        console.error('Error fetching subcategories:', error);
-        setSubCategories([]); // Nếu có lỗi thì set mảng trống
+        console.error('Lỗi khi lấy subCategories:', error);
+        setSubCategories([]); // Set mảng trống nếu có lỗi
       } finally {
-        setLoading(false); // Đặt loading = false khi hoàn thành fetch
+        setLoading(false); // Kết thúc fetch
       }
     };
 
-    fetchSubCategories(); // Gọi hàm fetch khi component mount
-  }, []); // [] chỉ chạy 1 lần khi component mount
+    fetchSubCategories(); // Gọi hàm khi component mount
+  }, []); // [] chạy 1 lần khi component mount
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
-    console.log(`[DEBUG] Input changed - Name: ${name}, Value: ${value}`);
+    console.log(`[DEBUG] Thay đổi input - Tên: ${name}, Giá trị: ${value}`);
     setFormFields((prev) => ({
       ...prev,
       [name]: type === 'checkbox' ? checked : value,
@@ -179,7 +178,7 @@ const ProductUpload = () => {
       context.setAlertBox({
         open: true,
         error: true,
-        msg: 'Chỉ được upload file ảnh (JPEG, PNG, JPG)!',
+        msg: 'Chỉ được tải lên file ảnh (JPEG, PNG, JPG)!',
       });
       return;
     }
@@ -195,105 +194,6 @@ const ProductUpload = () => {
       [fieldName]: e.target.value,
     }));
   };
-
-  // const addProduct = async (event) => {
-  //   event.preventDefault();
-  //   setLoading(true);
-
-  //   const {
-  //     name,
-  //     price,
-  //     category,
-  //     subCat,
-  //     description,
-  //     brand,
-  //     oldPrice,
-  //     countInStock,
-  //     discount,
-  //     weightName,
-  //     ramName,
-  //     sizeName,
-  //     isFeatured,
-  //   } = formFields;
-
-  //   // Kiểm tra các trường bắt buộc
-  //   if (!name || !price || !category || !subCat || files.length === 0) {
-  //     setLoading(false);
-  //     context.setAlertBox({
-  //       open: true,
-  //       error: true,
-  //       msg: 'Vui lòng nhập toàn bộ, không được để trống!',
-  //     });
-  //     return;
-  //   }
-
-  //   try {
-  //     const fd = new FormData();
-  //     fd.append('name', name);
-  //     fd.append('price', price);
-  //     fd.append('category', category._id || category);
-  //     fd.append('subCat', subCat._id || subCat);
-  //     fd.append('description', description || '');
-  //     fd.append('brand', brand || '');
-  //     fd.append('oldPrice', oldPrice || price);
-  //     fd.append('countInStock', countInStock || 0);
-  //     fd.append('discount', discount);
-  //     fd.append('weightName', weightName.join(','));
-  //     fd.append('ramName', ramName.join(','));
-  //     fd.append('sizeName', sizeName.join(','));
-
-  //     fd.append('isFeatured', Boolean(isFeatured));
-
-  //     // Đảm bảo `files` là mảng
-  //     if (!Array.isArray(files)) {
-  //       console.log('Files is not an array:', files);
-  //       setLoading(false);
-  //       return;
-  //     }
-
-  //     files.forEach((file) => fd.append('images', file));
-
-  //     const response = await postData('/api/products/create', fd);
-
-  //     if (response.success) {
-  //       context.setAlertBox({
-  //         open: true,
-  //         error: false,
-  //         msg: 'Bạn đã thêm sản phẩm thành công!',
-  //       });
-  //       setFormFields({
-  //         name: '',
-  //         description: '',
-  //         images: [],
-  //         brand: '',
-  //         price: '',
-  //         oldPrice: '',
-  //         category: '',
-  //         subCat: '',
-  //         countInStock: '',
-  //         discount: 0,
-  //         weightName: [],
-  //         ramName: [],
-  //         sizeName: [],
-  //         isFeatured: false,
-  //       });
-  //       setFiles([]); // Reset state files
-  //       setPreviews([]); // Reset state previews
-  //       navigate('/product/productlist');
-  //     } else {
-  //       throw new Error(response.message || 'Thêm sản phẩm thất bại');
-  //     }
-  //   } catch (error) {
-  //     context.setAlertBox({
-  //       open: true,
-  //       error: true,
-  //       msg: error.message || 'Đã xảy ra lỗi, vui lòng thử lại.',
-  //     });
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  //   console.log('[DEBUG] weightName:', weightName);
-  // };
 
   const addProduct = async (event) => {
     event.preventDefault();
@@ -320,18 +220,7 @@ const ProductUpload = () => {
       context.setAlertBox({
         open: true,
         error: true,
-        msg: 'Vui lòng nhập toàn bộ, không được để trống!',
-      });
-      return;
-    }
-
-    // Kiểm tra giá trị discount (nếu cần thiết)
-    if (discount < 0 || discount > 100) {
-      setLoading(false);
-      context.setAlertBox({
-        open: true,
-        error: true,
-        msg: 'Giảm giá phải nằm trong khoảng từ 0 đến 100%.',
+        msg: 'Vui lòng nhập đầy đủ, không được bỏ trống!',
       });
       return;
     }
@@ -346,21 +235,16 @@ const ProductUpload = () => {
       fd.append('oldPrice', oldPrice);
       fd.append('countInStock', countInStock || 0);
       fd.append('discount', discount || 0);
-      fd.append('weightName', weightName.join(','));
-      fd.append('ramName', ramName.join(','));
-      fd.append('sizeName', sizeName.join(','));
-      fd.append('isFeatured', Boolean(isFeatured));
 
-      // Đảm bảo `files` là mảng
-      if (!Array.isArray(files)) {
-        console.log('Files is not an array:', files);
-        setLoading(false);
-        return;
-      }
+      // Gửi các trường nếu có
+      if (weightName.length) fd.append('weightName', weightName.join(','));
+      if (ramName.length) fd.append('ramName', ramName.join(','));
+      if (sizeName.length) fd.append('sizeName', sizeName.join(','));
+
+      fd.append('isFeatured', Boolean(isFeatured));
 
       files.forEach((file) => fd.append('images', file));
 
-      // Gửi dữ liệu đến API
       const response = await postData('/api/products/create', fd);
 
       if (response.success) {
@@ -369,8 +253,6 @@ const ProductUpload = () => {
           error: false,
           msg: 'Bạn đã thêm sản phẩm thành công!',
         });
-
-        // Reset form fields và chuyển hướng
         setFormFields({
           name: '',
           description: '',
@@ -386,8 +268,8 @@ const ProductUpload = () => {
           sizeName: [],
           isFeatured: false,
         });
-        setFiles([]); // Reset state files
-        setPreviews([]); // Reset state previews
+        setFiles([]);
+        setPreviews([]);
         navigate('/product/productlist');
       } else {
         throw new Error(response.message || 'Thêm sản phẩm thất bại');
@@ -401,8 +283,6 @@ const ProductUpload = () => {
     } finally {
       setLoading(false);
     }
-
-    console.log('[DEBUG] weightName:', weightName);
   };
 
   return (
@@ -428,9 +308,9 @@ const ProductUpload = () => {
         <div className="row">
           <div className="col-md-12">
             <div className="card mt-0 p4 w-100">
-              <h5 className="mb-4">Basic Information</h5>
+              <h5 className="mb-5 !text-4xl">Nhập thông tin sản phẩm</h5>
               <div className="form-group mb-4">
-                <h6 className="mb-2">PRODUCT NAME</h6>
+                <h6 className="mb-2">Tên sản phẩm</h6>
                 <input
                   type="text"
                   name="name"
@@ -439,7 +319,7 @@ const ProductUpload = () => {
                 />
               </div>
               <div className="form-group">
-                <h6>DESCRIPTION</h6>
+                <h6>Mô tả sản phẩm</h6>
                 <textarea
                   rows="5"
                   cols="10"
@@ -451,7 +331,7 @@ const ProductUpload = () => {
               <div className="row">
                 <div className="col">
                   <div className="form-group">
-                    <h6>CATEGORY</h6>
+                    <h6>Danh mục</h6>
                     <Select
                       value={formFields.category || ''}
                       onChange={(e) => handleSelectChange(e, 'category')}
@@ -475,7 +355,7 @@ const ProductUpload = () => {
                 </div>
                 <div className="col">
                   <div className="form-group">
-                    <h6>SUB CATEGORY</h6>
+                    <h6>Danh mục con</h6>
                     <Select
                       value={formFields.subCat || ''}
                       onChange={(e) => handleSelectChange(e, 'subCat')}
@@ -497,7 +377,7 @@ const ProductUpload = () => {
               <div className="row">
                 <div className="col">
                   <div className="form-group">
-                    <h6>OLD PRICE</h6>
+                    <h6>Giá sản phẩm</h6>
                     <input
                       type="text"
                       name="oldPrice"
@@ -506,11 +386,10 @@ const ProductUpload = () => {
                     />
                   </div>
                 </div>
-                
 
                 <div className="col">
                   <div className="form-group">
-                    <h6>PRODUCT STOCK</h6>
+                    <h6>Tồn kho</h6>
                     <input
                       type="text"
                       name="countInStock"
@@ -524,7 +403,7 @@ const ProductUpload = () => {
               <div className="row">
                 <div className="col">
                   <div className="form-group">
-                    <h6>BRAND</h6>
+                    <h6>Địa chỉ</h6>
                     <input
                       type="text"
                       name="brand"
@@ -550,7 +429,7 @@ const ProductUpload = () => {
                 </div>
                 <div className="col">
                   <div className="form-group">
-                    <h6>DISCOUNT</h6>
+                    <h6>Giảm giá (%)</h6>
                     <input
                       type="text"
                       name="discount"

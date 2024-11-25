@@ -214,3 +214,7 @@ header.MuiPaper-root.MuiPaper-elevation.MuiPaper-elevation4.MuiAppBar-root.MuiAp
 span.MuiChip-label.MuiChip-labelMedium.css-1dybbl5-MuiChip-label {
   font-size: 1.4rem !important;
 }
+
+.MuiFormControl-root.css-1na8tzq-MuiFormControl-root {
+  margin: 0;
+}

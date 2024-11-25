@@ -122,174 +122,15 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// router.post('/create', upload.array('images'), async (req, res) => {
-//   try {
-//     console.log('--- Debug Start: Product Creation ---');
-//     console.log('Request Body:', req.body);
-
-//     // Upload images and get their URLs
-//     const uploadStatus = await uploadImages(req.files);
-//     console.log('Image Upload Status:', uploadStatus);
-
-//     const imgUrls = uploadStatus
-//       .filter((item) => item.success)
-//       .map((item) => item.url);
-
-//     console.log('Filtered Image URLs:', imgUrls);
-
-//     if (imgUrls.length === 0) {
-//       return res.status(500).json({
-//         success: false,
-//         message: 'Image upload failed.',
-//       });
-//     }
-
-//     // Extract fields from request body
-//     const {
-//       name,
-//       price,
-//       category,
-//       subCat,
-//       description,
-//       brand,
-//       oldPrice,
-//       countInStock,
-//       rating,
-//       isFeatured,
-//       discount,
-//       weightName, // A comma-separated string of weight names
-//       ramName,
-//       sizeName,
-//     } = req.body;
-
-//     console.log('Parsed Fields:', {
-//       name,
-//       price,
-//       category,
-//       subCat,
-//       description,
-//       brand,
-//       oldPrice,
-//       countInStock,
-//       rating,
-//       isFeatured,
-//       discount,
-//       weightName,
-//       ramName,
-//       sizeName,
-//     });
-
-//     // Validate ObjectId fields for category and subCat
-//     if (!mongoose.isValidObjectId(category)) {
-//       return res
-//         .status(400)
-//         .json({ success: false, message: 'Invalid category ID.' });
-//     }
-//     if (!mongoose.isValidObjectId(subCat)) {
-//       return res
-//         .status(400)
-//         .json({ success: false, message: 'Invalid sub-category ID.' });
-//     }
-
-//     // Split and process weightName, ramName, and sizeName
-//     const weightNames = weightName.split(',').map((w) => w.trim());
-//     const ramNames = ramName.split(',').map((r) => r.trim());
-//     const sizeNames = sizeName.split(',').map((s) => s.trim());
-
-//     console.log('Split Weight Names:', weightNames);
-
-//     // Fetch IDs for weights
-//     const weightDocs = await ProductWeigth.find({
-//       weightName: { $in: weightNames },
-//     });
-//     const weightIds = weightDocs.map((doc) => doc._id);
-
-//     if (weightIds.length !== weightNames.length) {
-//       const foundWeights = weightDocs.map((doc) => doc.weightName);
-//       const missingWeights = weightNames.filter(
-//         (w) => !foundWeights.includes(w)
-//       );
-//       return res.status(400).json({
-//         success: false,
-//         message: `Invalid weights provided: ${missingWeights.join(', ')}`,
-//       });
-//     }
-
-//     // Fetch IDs for RAMs and Sizes
-//     const ramDocs = await ProductRams.find({ ramName: { $in: ramNames } });
-//     const ramIds = ramDocs.map((doc) => doc._id);
-
-//     const sizeDocs = await ProductSize.find({ sizeName: { $in: sizeNames } });
-//     const sizeIds = sizeDocs.map((doc) => doc._id);
-
-//     // Validate category and sub-category existence
-//     const existingCategory = await Category.findById(category);
-//     if (!existingCategory) {
-//       return res
-//         .status(400)
-//         .json({ success: false, message: 'Invalid category.' });
-//     }
-
-//     const existingSubCategory = await SubCategory.findById(subCat);
-//     if (!existingSubCategory) {
-//       return res
-//         .status(400)
-//         .json({ success: false, message: 'Invalid sub-category.' });
-//     }
-
-//     // Create new product
-//     const newProduct = new Products({
-//       name,
-//       description,
-//       images: imgUrls,
-//       brand,
-//       price,
-//       oldPrice,
-//       category,
-//       subCat,
-//       countInStock,
-//       rating: rating || 0,
-//       isFeatured: isFeatured || false,
-//       discount,
-//       weightName: weightIds, // Array of ObjectId for weights
-//       ramName: ramIds, // Array of ObjectId for RAMs
-//       sizeName: sizeIds, // Array of ObjectId for Sizes
-//     });
-
-//     const savedProduct = await newProduct.save();
-//     console.log('Product saved successfully:', savedProduct);
-
-//     return res.status(201).json({
-//       success: true,
-//       message: 'Product created successfully.',
-//       product: savedProduct,
-//     });
-//   } catch (error) {
-//     console.error('Error creating product:', error.message);
-//     res.status(500).json({
-//       success: false,
-//       message: 'Server error.',
-//       error: error.message,
-//     });
-//   }
-// });
-
-// PUT: Update an existing product
-
 router.post('/create', upload.array('images'), async (req, res) => {
   try {
     console.log('--- Debug Start: Product Creation ---');
-    console.log('Request Body:', req.body);
 
-    // Upload images and get their URLs
+    // Upload images
     const uploadStatus = await uploadImages(req.files);
-    console.log('Image Upload Status:', uploadStatus);
-
     const imgUrls = uploadStatus
       .filter((item) => item.success)
       .map((item) => item.url);
-
-    console.log('Filtered Image URLs:', imgUrls);
 
     if (imgUrls.length === 0) {
       return res.status(500).json({
@@ -298,7 +139,6 @@ router.post('/create', upload.array('images'), async (req, res) => {
       });
     }
 
-    // Extract fields from request body
     const {
       name,
       category,
@@ -307,121 +147,68 @@ router.post('/create', upload.array('images'), async (req, res) => {
       brand,
       oldPrice,
       countInStock,
-      rating,
-      isFeatured,
-      discount,
-      weightName, // A comma-separated string of weight names
-      ramName,
-      sizeName,
-    } = req.body;
-
-    console.log('Parsed Fields:', {
-      name,
-      category,
-      subCat,
-      description,
-      brand,
-      oldPrice,
-      countInStock,
-      rating,
-      isFeatured,
       discount,
       weightName,
       ramName,
       sizeName,
-    });
+      isFeatured,
+    } = req.body;
 
-    // Validate ObjectId fields for category and subCat
-    if (!mongoose.isValidObjectId(category)) {
-      return res
-        .status(400)
-        .json({ success: false, message: 'Invalid category ID.' });
-    }
-    if (!mongoose.isValidObjectId(subCat)) {
-      return res
-        .status(400)
-        .json({ success: false, message: 'Invalid sub-category ID.' });
-    }
-
-    // Split and process weightName, ramName, and sizeName
-    const weightNames = weightName.split(',').map((w) => w.trim());
-    const ramNames = ramName.split(',').map((r) => r.trim());
-    const sizeNames = sizeName.split(',').map((s) => s.trim());
-
-    console.log('Split Weight Names:', weightNames);
-
-    // Fetch IDs for weights
-    const weightDocs = await ProductWeigth.find({
-      weightName: { $in: weightNames },
-    });
-    const weightIds = weightDocs.map((doc) => doc._id);
-
-    if (weightIds.length !== weightNames.length) {
-      const foundWeights = weightDocs.map((doc) => doc.weightName);
-      const missingWeights = weightNames.filter(
-        (w) => !foundWeights.includes(w)
-      );
+    // Validate category and sub-category IDs
+    if (
+      !mongoose.isValidObjectId(category) ||
+      !mongoose.isValidObjectId(subCat)
+    ) {
       return res.status(400).json({
         success: false,
-        message: `Invalid weights provided: ${missingWeights.join(', ')}`,
+        message: 'Invalid category or sub-category ID.',
       });
     }
 
-    // Fetch IDs for RAMs and Sizes
-    const ramDocs = await ProductRams.find({ ramName: { $in: ramNames } });
-    const ramIds = ramDocs.map((doc) => doc._id);
-
-    const sizeDocs = await ProductSize.find({ sizeName: { $in: sizeNames } });
-    const sizeIds = sizeDocs.map((doc) => doc._id);
-
-    // Validate category and sub-category existence
-    const existingCategory = await Category.findById(category);
-    if (!existingCategory) {
-      return res
-        .status(400)
-        .json({ success: false, message: 'Invalid category.' });
-    }
-
-    const existingSubCategory = await SubCategory.findById(subCat);
-    if (!existingSubCategory) {
-      return res
-        .status(400)
-        .json({ success: false, message: 'Invalid sub-category.' });
-    }
-
-    // Calculate price based on oldPrice and discount
-    if (discount < 0 || discount > 100) {
-      return res.status(400).json({
-        success: false,
-        message: 'Discount must be between 0 and 100.',
+    // Fetch optional attributes if provided
+    let weightIds = [];
+    if (weightName) {
+      const weightDocs = await ProductWeigth.find({
+        weightName: { $in: weightName.split(',') },
       });
+      weightIds = weightDocs.map((doc) => doc._id);
     }
 
-    const price = oldPrice - (oldPrice * discount) / 100;
-    console.log(`Calculated Price: ${price} from OldPrice: ${oldPrice} and Discount: ${discount}%`);
+    let ramIds = [];
+    if (ramName) {
+      const ramDocs = await ProductRams.find({
+        ramName: { $in: ramName.split(',') },
+      });
+      ramIds = ramDocs.map((doc) => doc._id);
+    }
 
-    // Create new product
+    let sizeIds = [];
+    if (sizeName) {
+      const sizeDocs = await ProductSize.find({
+        sizeName: { $in: sizeName.split(',') },
+      });
+      sizeIds = sizeDocs.map((doc) => doc._id);
+    }
+
+    // Create the product
     const newProduct = new Products({
       name,
       description,
       images: imgUrls,
       brand,
       oldPrice,
-      price,
+      price: oldPrice * (1 - discount / 100), // Calculate price
       category,
       subCat,
       countInStock,
-      rating: rating || 0,
-      isFeatured: isFeatured || false,
       discount,
-      weightName: weightIds, // Array of ObjectId for weights
-      ramName: ramIds, // Array of ObjectId for RAMs
-      sizeName: sizeIds, // Array of ObjectId for Sizes
+      weightName: weightIds,
+      ramName: ramIds,
+      sizeName: sizeIds,
+      isFeatured: isFeatured || false,
     });
 
     const savedProduct = await newProduct.save();
-    console.log('Product saved successfully:', savedProduct);
-
     return res.status(201).json({
       success: true,
       message: 'Product created successfully.',
@@ -437,115 +224,67 @@ router.post('/create', upload.array('images'), async (req, res) => {
   }
 });
 
-
+// API PUT để cập nhật sản phẩm
 router.put('/:id', upload.array('images'), async (req, res) => {
   try {
-    // Find the product by ID
+    console.log('Bắt đầu cập nhật sản phẩm với ID:', req.params.id);
+    console.log('Dữ liệu nhận được từ client:', req.body); // Log toàn bộ dữ liệu nhận từ client
+
+    // Tìm sản phẩm theo ID
     const product = await Products.findById(req.params.id);
     if (!product) {
+      console.log('Không tìm thấy sản phẩm với ID:', req.params.id);
       return res.status(404).json({
         success: false,
-        message: 'Product not found.',
+        message: 'Không tìm thấy sản phẩm.',
       });
     }
+    console.log('Sản phẩm tìm thấy:', product);
 
-    // Upload new images if any
-    const uploadStatus = await uploadImages(req.files);
-    const newImageUrls = uploadStatus
-      .filter((item) => item.success)
-      .map((item) => item.url);
-
-    // Validate the updated fields
-    const {
-      name,
-      price,
-      category,
-      subCat,
-      description,
-      brand,
-      oldPrice,
-      countInStock,
-      rating,
-      isFeatured,
-      discount,
-      weightName,
-      ramName,
-      sizeName,
-    } = req.body;
-
-    // Validate category and sub-category (same as in POST)
-    const existingCategory = await Category.findById(category);
-    if (!existingCategory) {
-      return res
-        .status(400)
-        .json({ success: false, message: 'Invalid category.' });
-    }
-
-    const existingSubCategory = await SubCategory.findById(subCat);
-    if (!existingSubCategory) {
-      return res
-        .status(400)
-        .json({ success: false, message: 'Invalid sub-category.' });
-    }
-
-    const existingWeight = await ProductWeigth.findById(weightName);
-    if (!existingWeight) {
-      return res
-        .status(400)
-        .json({ success: false, message: 'Invalid weight selected.' });
-    }
-
-    const existingRam = await ProductRams.findById(ramName);
-    if (!existingRam) {
-      return res
-        .status(400)
-        .json({ success: false, message: 'Invalid RAM selected.' });
-    }
-
-    const existingSize = await ProductSize.findById(sizeName);
-    if (!existingSize) {
-      return res
-        .status(400)
-        .json({ success: false, message: 'Invalid size selected.' });
-    }
-
-    // Update the product
+    // Kiểm tra các trường cần cập nhật, nếu không có dữ liệu thì set thành empty hoặc null
     const updatedProduct = await Products.findByIdAndUpdate(
       req.params.id,
       {
-        name,
-        description,
-        images: newImageUrls, // Keep old images if no new ones
-        brand,
-        price,
-        oldPrice,
-        category,
-        subCat,
-        countInStock,
-        rating: rating || product.rating,
-        isFeatured: isFeatured || product.isFeatured,
-        discount,
-        weightName,
-        ramName,
-        sizeName,
+        name: req.body.name || product.name,
+        description: req.body.description || product.description,
+        images: req.body.images || product.images, // Giữ hình ảnh cũ nếu không có hình ảnh mới
+        brand: req.body.brand || product.brand,
+        price: req.body.price || product.price, // Nếu không có price mới, giữ price cũ
+        oldPrice: req.body.oldPrice || product.oldPrice,
+        category: req.body.category || product.category,
+        subCat: req.body.subCat || product.subCat,
+        countInStock: req.body.countInStock || product.countInStock,
+        discount: req.body.discount || product.discount,
+
+        // Nếu không có dữ liệu cho các trường weightName, ramName, sizeName, sẽ set thành null (hoặc mảng trống)
+        weightName: req.body.weightName ? req.body.weightName.split(',') : [], // Nếu không có dữ liệu, set thành mảng trống
+        ramName: req.body.ramName ? req.body.ramName.split(',') : [], // Nếu không có dữ liệu, set thành mảng trống
+        sizeName: req.body.sizeName ? req.body.sizeName.split(',') : [], // Nếu không có dữ liệu, set thành mảng trống
+
+        isFeatured:
+          req.body.isFeatured !== undefined
+            ? req.body.isFeatured
+            : product.isFeatured, // Giữ giá trị cũ nếu không có update
       },
-      { new: true, runValidators: true }
+      { new: true, runValidators: true } // Trả về sản phẩm đã cập nhật
     );
 
+    console.log('Sản phẩm đã được cập nhật thành công:', updatedProduct); // Log sản phẩm đã cập nhật
     return res.status(200).json({
       success: true,
-      message: 'Product updated successfully.',
+      message: 'Cập nhật sản phẩm thành công.',
       product: updatedProduct,
     });
   } catch (error) {
-    console.error('Error updating product:', error.message);
+    console.error('Lỗi khi cập nhật sản phẩm:', error.message);
     res.status(500).json({
       success: false,
-      message: 'Server error.',
+      message: 'Lỗi máy chủ.',
       error: error.message,
     });
   }
 });
+
 // Delete product route
 router.delete('/:id', async (req, res) => {
   try {

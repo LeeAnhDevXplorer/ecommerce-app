@@ -1,20 +1,49 @@
 import CloseIcon from '@mui/icons-material/Close';
-import { MenuItem, Select, CircularProgress } from '@mui/material';
+import {
+  Box,
+  Chip,
+  CircularProgress,
+  FormControl,
+  MenuItem,
+  Select,
+} from '@mui/material';
 import AppBar from '@mui/material/AppBar';
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
 import IconButton from '@mui/material/IconButton';
 import List from '@mui/material/List';
 import Slide from '@mui/material/Slide';
+import { useTheme } from '@mui/material/styles';
 import TextField from '@mui/material/TextField';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import React, { useEffect, useState } from 'react';
 import ImageUpload from '../../../../Components/ImageUpload/ImageUpload';
 import { fetchDataFromApi } from '../../../../utils/api';
+
 const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
 });
+
+const ITEM_HEIGHT = 48;
+const ITEM_PADDING_TOP = 8;
+const MenuProps = {
+  PaperProps: {
+    style: {
+      maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
+      width: 250,
+    },
+  },
+};
+
+function getStyles(name, personName, theme) {
+  return {
+    fontWeight:
+      personName.indexOf(name) === -1
+        ? theme.typography.fontWeightRegular
+        : theme.typography.fontWeightMedium,
+  };
+}
 
 const ProductEditDialog = ({
   handleClose,
@@ -28,9 +57,13 @@ const ProductEditDialog = ({
   removeFile,
   handleSelectChange,
 }) => {
+  const theme = useTheme();
   const [loading, setLoading] = useState(false);
   const [catData, setCatData] = useState([]);
   const [subCatData, setsubCatData] = useState([]);
+  const [pRamData, setPRamData] = useState([]);
+  const [pWeigthData, setPWeigthData] = useState([]);
+  const [pSizeData, setPSizeData] = useState([]);
 
   // Fetch danh mục sản phẩm khi component được render
   useEffect(() => {
@@ -50,6 +83,27 @@ const ProductEditDialog = ({
       .finally(() => {
         setLoading(false);
       });
+  }, []);
+  useEffect(() => {
+    const fetchAllData = async () => {
+      setLoading(true);
+      try {
+        const [prams, weights, sizes] = await Promise.all([
+          fetchDataFromApi('/api/prams'),
+          fetchDataFromApi('/api/weight'),
+          fetchDataFromApi('/api/psize'),
+        ]);
+        setPRamData(prams.data || []);
+        setPWeigthData(weights.data || []);
+        setPSizeData(sizes.data || []);
+      } catch (error) {
+        console.error('Lỗi khi lấy dữ liệu:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAllData();
   }, []);
 
   useEffect(() => {
@@ -213,44 +267,129 @@ const ProductEditDialog = ({
                 />
               </div>
             </div>
-            <div className="d-flex gap-4">
-              <div className="w-100">
-                <Select
-                  value={formFields.category}
-                  onChange={(e) => handleSelectChange(e, 'category')}
-                  displayEmpty
-                  className="w-100"
-                >
-                  <MenuItem value="">
-                    <em>None</em>
-                  </MenuItem>
-                  {loading ? (
-                    <CircularProgress size={24} />
-                  ) : (
-                    catData.map((item, index) => (
-                      <MenuItem key={index} value={item._id}>
-                        {item.name}
-                      </MenuItem>
-                    ))
-                  )}
-                </Select>
-              </div>
-              <div className="w-100">
-                <Select
-                  value={formFields.subCat}
-                  onChange={(e) => handleSelectChange(e, 'subCat')}
-                  displayEmpty
-                  className="w-100"
-                >
-                  <MenuItem value="">
-                    <em>None</em>
-                  </MenuItem>
-                  {subCatData.map((item, index) => (
-                    <MenuItem key={index} value={item._id || ''}>
-                      {item.subCat || 'No Subcategory'}
+            <div className="">
+              <h6
+                style={{
+                  fontSize: '1.6rem',
+                  textAlign: 'center',
+                  marginTop: '10px',
+                }}
+              >
+                Bạn vui lòng nhập lại giá trị mới khi chỉnh sửa (Nếu không chọn
+                sẽ mất)
+              </h6>
+              <div className="d-flex gap-4">
+                <div className="w-100">
+                  <Select
+                    value={formFields.category}
+                    onChange={(e) => handleSelectChange(e, 'category')}
+                    displayEmpty
+                    className="w-100"
+                  >
+                    <MenuItem value="">
+                      <em>None</em>
                     </MenuItem>
-                  ))}
-                </Select>
+                    {loading ? (
+                      <CircularProgress size={24} />
+                    ) : (
+                      catData.map((item, index) => (
+                        <MenuItem key={index} value={item._id}>
+                          {item.name}
+                        </MenuItem>
+                      ))
+                    )}
+                  </Select>
+                </div>
+                <div className="w-100">
+                  <Select
+                    value={formFields.subCat}
+                    onChange={(e) => handleSelectChange(e, 'subCat')}
+                    displayEmpty
+                    className="w-100"
+                  >
+                    <MenuItem value="">
+                      <em>None</em>
+                    </MenuItem>
+                    {subCatData.map((item, index) => (
+                      <MenuItem key={index} value={item._id || ''}>
+                        {item.subCat || 'No Subcategory'}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </div>
+              </div>
+              <div className="d-flex gap-4 mt-3">
+                <div className="w-100">
+                  <Select
+                    className="w-100"
+                    multiple
+                    value={
+                      Array.isArray(formFields.ramName)
+                        ? formFields.ramName
+                        : []
+                    }
+                    onChange={(e) => handleSelectChange(e, 'ramName')}
+                    MenuProps={MenuProps}
+                  >
+                    {pRamData.map((w) => (
+                      <MenuItem
+                        key={w._id}
+                        value={w._id}
+                        style={getStyles(w, pRamData, theme)}
+                      >
+                        {w.ramName}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </div>
+
+                <div className="w-100">
+                  <Select
+                    className="w-100"
+                    multiple
+                    value={
+                      Array.isArray(formFields.weightName)
+                        ? formFields.weightName
+                        : []
+                    }
+                    onChange={(e) => handleSelectChange(e, 'weightName')}
+                    MenuProps={MenuProps}
+                  >
+                    {pWeigthData.map((w) => (
+                      <MenuItem
+                        key={w._id}
+                        value={w._id}
+                        style={getStyles(w, pWeigthData, theme)}
+                      >
+                        {w.weightName}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </div>
+
+                <div className="w-100">
+                  <Select
+                    className="w-100"
+                    multiple
+                    value={
+                      Array.isArray(formFields.sizeName)
+                        ? formFields.sizeName
+                        : []
+                    }
+                    onChange={(e) => handleSelectChange(e, 'sizeName')}
+                    MenuProps={MenuProps}
+                  >
+                    {pSizeData.map((w) => (
+                      <MenuItem
+                        key={w._id}
+                        value={w._id}
+                        style={getStyles(w, pSizeData, theme)}
+                      >
+                        {w.sizeName}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </div>
               </div>
             </div>
           </List>

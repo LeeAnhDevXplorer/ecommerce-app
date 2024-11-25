@@ -8,6 +8,7 @@ import {
   Pagination,
   Select,
 } from '@mui/material';
+import mongoose from 'mongoose';
 import React, { useContext, useEffect, useState } from 'react';
 import { deleteData, editData, fetchDataFromApi } from '../../utils/api';
 import './Products.css';
@@ -21,6 +22,11 @@ import ProductsTable from './Components/ProductsTable/ProductsTable';
 const Products = () => {
   const [open, setOpen] = useState(false);
   const [showBy, setShowBy] = useState('');
+
+  const [pRamData, setPRamData] = useState([]);
+  const [pWeigthData, setPWeigthData] = useState([]);
+  const [pSizeData, setPSizeData] = useState([]);
+  const [subCatData, setsubCatData] = useState([]);
   const [catData, setCatData] = useState([]);
   const [productList, setProductList] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -43,8 +49,34 @@ const Products = () => {
     category: '',
     subCat: '',
     countInStock: '',
+    discount: 0,
+    weightName: [],
+    ramName: [],
+    sizeName: [],
     isFeatured: false,
   });
+
+  useEffect(() => {
+    const fetchAllData = async () => {
+      setLoading(true);
+      try {
+        const [prams, weights, sizes] = await Promise.all([
+          fetchDataFromApi('/api/prams'),
+          fetchDataFromApi('/api/weight'),
+          fetchDataFromApi('/api/psize'),
+        ]);
+        setPRamData(prams.data || []);
+        setPWeigthData(weights.data || []);
+        setPSizeData(sizes.data || []);
+      } catch (error) {
+        console.error('Lỗi khi lấy dữ liệu:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAllData();
+  }, []);
 
   useEffect(() => {
     setLoading(true);
@@ -72,15 +104,15 @@ const Products = () => {
       setsubCatData(response); // Cập nhật trạng thái catData với dữ liệu nhận được
     } catch (error) {
       console.error('Failed to fetch categories:', error);
-    } finally { 
+    } finally {
       setLoading(false); // Đặt trạng thái loading thành false
     }
   };
 
-    useEffect(() => {
-      context.setProgress(30);
-      fetchCategories(context.setProgress(100)); // Gọi hàm để tải danh mục khi component được mount
-    }, []);
+  useEffect(() => {
+    context.setProgress(30);
+    fetchCategories(context.setProgress(100)); // Gọi hàm để tải danh mục khi component được mount
+  }, []);
 
   const handleSelectChange = (e, fieldName) => {
     setFormFields((prev) => ({
@@ -166,13 +198,12 @@ const Products = () => {
           price: res.price || '',
           oldPrice: res.oldPrice || '',
           category: res.category ? res.category.name : '',
-          // subCat:
-          //   res.category && typeof res.category === 'object'
-          //     ? res.category.subCat || ''
-          //     : '',
           subCat: res.subCat || '',
           countInStock: res.countInStock || '',
           isFeatured: res.isFeatured || false,
+          weightName: res.weightName ? res.weightName.join(',') : '', // Gán mảng weightName vào chuỗi
+          ramName: res.ramName ? res.ramName.join(',') : '', // Gán mảng ramName vào chuỗi
+          sizeName: res.sizeName ? res.sizeName.join(',') : '', // Gán mảng sizeName vào chuỗi
         });
 
         // Kiểm tra và log thông tin hình ảnh
@@ -191,6 +222,10 @@ const Products = () => {
 
     try {
       const formData = new FormData();
+      console.log('Form data before append:');
+      console.log('weightName:', formFields.weightName);
+      console.log('ramName:', formFields.ramName);
+      console.log('sizeName:', formFields.sizeName);
 
       // Kiểm tra và chuyển đổi giá trị trước khi append
       formData.append('name', formFields.name?.trim() || '');
@@ -199,15 +234,20 @@ const Products = () => {
       formData.append('price', Number(formFields.price) || 0);
       formData.append('oldPrice', Number(formFields.oldPrice) || 0);
       formData.append('category', formFields.category?.trim() || '');
-      formData.append(
-        'subCat',
-        formFields.subCat && formFields.subCat.trim()
-          ? formFields.subCat.trim()
-          : 'default-value'
-      );
       formData.append('subCat', formFields.subCat?.trim() || '');
       formData.append('countInStock', Number(formFields.countInStock) || 0);
       formData.append('isFeatured', Boolean(formFields.isFeatured));
+
+      // Thêm các trường weightName, ramName, sizeName vào formData
+      if (formFields.weightName) {
+        formData.append('weightName', formFields.weightName);
+      }
+      if (formFields.ramName) {
+        formData.append('ramName', formFields.ramName);
+      }
+      if (formFields.sizeName) {
+        formData.append('sizeName', formFields.sizeName);
+      }
 
       // Xử lý hình ảnh hiện có
       const existingImages = previews.filter(
@@ -280,6 +320,7 @@ const Products = () => {
       setLoading(false);
     }
   };
+
   const handleDeleteConfirm = async () => {
     context.setProgress(30); // Set progress to 30% to indicate the deletion process has started
 
@@ -358,23 +399,31 @@ const Products = () => {
     };
   }, []);
 
-  console.log('Product list to display:', productList);
-
   return (
     <div className="right-content w-100">
       <div className="card shadow border-0 p-3 mt-4 w-100">
         <div className="MuiBox-root css-99a237 d-flex">
           <h6 className="MuiTypography-root MuiTypography-h6 css-66yapz-MuiTypography-root">
-            Products Table
+            Danh sách sản phẩm hiện có
           </h6>
-          <Breadcrumbs aria-label="breadcrumb" className="ml-auto breadcrumbs_">
+          <Breadcrumbs
+            style={{ color: '#FFF' }}
+            aria-label="breadcrumb"
+            className="ml-auto breadcrumbs_"
+          >
             <Chip
+              style={{ color: '#FFF' }}
               component="a"
               href="/"
               label="Dashboard"
-              icon={<HomeIcon fontSize="small" />}
+              icon={<HomeIcon style={{ color: '#FFF' }} fontSize="small" />}
             />
-            <Chip href="#" label="Products" icon={<ExpandMoreIcon />} />
+            <Chip
+              style={{ color: '#FFF' }}
+              href="#"
+              label="Products"
+              icon={<ExpandMoreIcon />}
+            />
           </Breadcrumbs>
         </div>
         <div className="row cardFilter mt-4">
