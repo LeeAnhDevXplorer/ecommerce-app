@@ -4,8 +4,6 @@ import React, { useContext, useState } from 'react';
 import { BsArrowsFullscreen } from 'react-icons/bs';
 import { FaRegHeart } from 'react-icons/fa';
 import { MyContext } from '../../App';
-import { assets } from '../../assets/assets';
-import ProductModal from '../ProductModal/ProductModal';
 import './ProductItem.css';
 const ProductItem = (props) => {
   const context = useContext(MyContext);

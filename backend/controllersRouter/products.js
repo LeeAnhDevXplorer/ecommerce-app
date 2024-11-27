@@ -63,42 +63,64 @@ router.post('/upload', upload.array('images'), async (req, res) => {
   res.json({ uploadedFiles, cloudinaryUploadResults });
 });
 
-// Route to fetch all products with pagination
 router.get('/', async (req, res) => {
   try {
-    const page = parseInt(req.query.page) || 1;
-    const perPage = 10;
-    const totalPosts = await Products.countDocuments();
+    const page = Math.max(1, parseInt(req.query.page) || 1);
+    const perPage = parseInt(req.query.limit) || 10;
+
+    const query = {};
+
+    if (req.query.catName) {
+      query.catName = new RegExp(req.query.catName, 'i');
+    }
+
+    if (req.query.subName) {
+      query.subCat = req.query.subName.trim();
+    }
+
+    const totalPosts = await Products.countDocuments(query);
+
+    if (totalPosts === 0) {
+      return res.status(404).json({
+        success: false,
+        message: 'No products found',
+      });
+    }
+
     const totalPages = Math.ceil(totalPosts / perPage);
 
     if (page > totalPages) {
-      return res.status(404).json({ message: 'Page not found' });
+      return res.status(400).json({
+        success: false,
+        message: `Page ${page} exceeds total pages (${totalPages})`,
+      });
     }
 
-    const productList = await Products.find()
-      .populate('category')
-      .populate('subCat')
-      .populate('weightName')
-      .populate('ramName')
-      .populate('sizeName')
+    const productList = await Products.find(query)
+      .populate('category', 'name')
+      .populate('subCat', 'name')
+      .populate('weightName', 'name')
+      .populate('ramName', 'name')
+      .populate('sizeName', 'name')
       .skip((page - 1) * perPage)
       .limit(perPage)
-      .exec();
-
-    if (!productList || productList.length === 0) {
-      return res
-        .status(404)
-        .json({ success: false, message: 'No products found' });
-    }
+      .lean();
 
     res.status(200).json({
       success: true,
+      currentPage: page,
+      totalPages,
+      totalItems: totalPosts,
+      itemsPerPage: perPage,
       data: productList,
-      totalPages: totalPages,
-      page: page,
     });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    console.error('Error fetching products:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined,
+    });
   }
 });
 

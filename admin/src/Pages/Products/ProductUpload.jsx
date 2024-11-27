@@ -83,6 +83,7 @@ const ProductUpload = () => {
     category: '',
     subCat: '',
     catName: '',
+    subName: '',
     countInStock: '',
     discount: 0,
     weightName: [],
@@ -197,7 +198,12 @@ const ProductUpload = () => {
   };
 
   const selectCat = (cat) => {
-    formFields.catName = cat
+    formFields.catName = cat;
+  };
+
+  const selectSubCat = (subcat) => {
+    alert(subcat)
+    formFields.subName = subcat;
   };
 
   const addProduct = async (event) => {
@@ -209,6 +215,7 @@ const ProductUpload = () => {
       category,
       subCat,
       catName,
+      subName,
       description,
       brand,
       oldPrice,
@@ -236,7 +243,8 @@ const ProductUpload = () => {
       fd.append('name', name);
       fd.append('category', category._id || category);
       fd.append('subCat', subCat._id || subCat);
-      fd.append("catName", formFields.catName);
+      fd.append('catName', formFields.catName);
+      fd.append('subName', formFields.subName);
       fd.append('description', description || '');
       fd.append('brand', brand || '');
       fd.append('oldPrice', oldPrice);
@@ -377,7 +385,11 @@ const ProductUpload = () => {
                         <em>None</em>
                       </MenuItem>
                       {subCategories?.map((item, index) => (
-                        <MenuItem key={index} value={item._id}>
+                        <MenuItem
+                          key={index}
+                          value={item._id}
+                          onClick={() => selectSubCat(item.subCat)}
+                        >
                           {item.subCat || 'No Subcategory'}
                         </MenuItem>
                       ))}

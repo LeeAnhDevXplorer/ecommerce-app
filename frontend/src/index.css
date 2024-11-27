@@ -1,6 +1,6 @@
-@import url("https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&display=swap");
-@import url("https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick.min.css");
-@import url("https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick-theme.min.css");
+@import url('https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&display=swap');
+@import url('https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick.min.css');
+@import url('https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick-theme.min.css');
 * {
   margin: 0;
   padding: 0;
@@ -9,7 +9,7 @@
 html {
   font-size: 62.5%;
   line-height: 1.6rem;
-  font-family: "Lato", sans-serif;
+  font-family: 'Lato', sans-serif;
 }
 
 @media (min-width: 1300px) {
@@ -21,7 +21,6 @@ html {
     max-width: 1200px;
   }
 }
-
 
 .hd {
   font-size: 2.5rem;
@@ -83,7 +82,7 @@ html {
   width: 33%;
 }
 .productListings .productItem.one {
-  width:49.7%;
+  width: 49.7%;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -95,10 +94,22 @@ html {
   align-items: center;
 }
 
-.productListings .productItem.one .info h4{
+.productListings .productItem.one .info h4 {
   font-size: 2rem;
 }
 
-.productListings .productItem.one .info span{
+.productListings .productItem.one .info span {
   font-size: 1.8rem;
+}
+
+.MuiTabs-scrollButtons.Mui-disabled {
+  opacity: 0.3;
+}
+.filter-tabs{
+
+}
+.MuiButtonBase-root  {
+  font-size: 1.2rem !important;
+  color: #4b4747 !important;
+  font-weight: 600 !important;
 }

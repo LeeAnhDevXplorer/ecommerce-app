@@ -57,6 +57,7 @@ const ProductEditDialog = ({
   removeFile,
   handleSelectChange,
   selectCat,
+  selectSubCat,
 }) => {
   const theme = useTheme();
   const [loading, setLoading] = useState(false);
@@ -326,7 +327,11 @@ const ProductEditDialog = ({
                       <em>None</em>
                     </MenuItem>
                     {subCatData.map((item, index) => (
-                      <MenuItem key={index} value={item._id || ''}>
+                      <MenuItem
+                        key={index}
+                        value={item._id || ''}
+                        onClick={() => selectSubCat(item.subCat)}
+                      >
                         {item.subCat || 'No Subcategory'}
                       </MenuItem>
                     ))}

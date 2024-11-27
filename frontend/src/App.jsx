@@ -27,18 +27,16 @@ const App = () => {
   const [isLogin, setisLogin] = useState(false);
   const [catData, setCatData] = useState([]);
   const [subCatData, setSubCatData] = useState([]);
-  const [fashionData, setFashionData] = useState([]);
+  const [activeCat, setActiveCat] = useState('');
 
   useEffect(() => {
     getCountry('https://countriesnow.space/api/v0.1/countries/');
     fetchDataFromApi(`/api/category`).then((res) => {
       setCatData(res.categoryList);
+      setActiveCat(res.categoryList[0]?.name);
     });
     fetchDataFromApi('/api/subCategory').then((res) => {
       setSubCatData(res.data);
-    });
-    fetchDataFromApi('/api/products?catName=Thời Trang').then((res) => {
-      setFashionData(res);
     });
   }, []);
 
@@ -68,6 +66,8 @@ const App = () => {
     setCatData,
     subCatData,
     setSubCatData,
+    activeCat,
+    setActiveCat,
   };
   return (
     <BrowserRouter>
@@ -76,7 +76,7 @@ const App = () => {
 
         <Routes>
           <Route path="/" exact={true} element={<Home />} />
-          <Route path="/cat/:id" exact={true} element={<Listing />} />
+          <Route path="/subCat/:id" exact={true} element={<Listing />} />
           <Route
             path="/product/:id"
             exact={true}
