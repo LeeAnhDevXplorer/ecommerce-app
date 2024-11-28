@@ -27,6 +27,7 @@ const Listing = () => {
 
   const { id } = useParams();
   useEffect(() => {
+    console.log('Giá trị ID:', id); // Kiểm tra giá trị id
     // Kiểm tra nếu id hợp lệ trước khi gọi API
     if (!id) {
       console.error('ID không hợp lệ!');
@@ -39,6 +40,7 @@ const Listing = () => {
         if (res && res.data) {
           // Nếu có dữ liệu, cập nhật state
           setProductData(res.data);
+          console.log(res);
         } else {
           // Nếu không có dữ liệu trả về
           console.error('Không nhận được dữ liệu sản phẩm.');

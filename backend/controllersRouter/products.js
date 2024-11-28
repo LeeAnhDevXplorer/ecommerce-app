@@ -65,21 +65,36 @@ router.post('/upload', upload.array('images'), async (req, res) => {
 
 router.get('/', async (req, res) => {
   try {
-    const page = Math.max(1, parseInt(req.query.page) || 1);
-    const perPage = parseInt(req.query.limit) || 10;
+    // Kiểm tra page và limit
+    const page = Math.max(1, parseInt(req.query.page, 10) || 1);
+    const perPage = Math.max(1, parseInt(req.query.limit, 10) || 10);
 
+    // Khởi tạo query trống
     const query = {};
 
+    // Xử lý catName nếu tồn tại
     if (req.query.catName) {
-      query.catName = new RegExp(req.query.catName, 'i');
+      query.catName = new RegExp(req.query.catName);
     }
 
+    // Xử lý subName nếu tồn tại
     if (req.query.subName) {
-      query.subCat = req.query.subName.trim();
+      query.subCat = req.query.subName;
     }
 
+
+    // Kiểm tra nếu Products không được khai báo hoặc undefined
+    if (!Products) {
+      return res.status(500).json({
+        success: false,
+        message: 'Database connection error',
+      });
+    }
+
+    // Đếm tổng số sản phẩm
     const totalPosts = await Products.countDocuments(query);
 
+    // Nếu không có sản phẩm nào
     if (totalPosts === 0) {
       return res.status(404).json({
         success: false,
@@ -87,8 +102,10 @@ router.get('/', async (req, res) => {
       });
     }
 
+    // Tính tổng số trang
     const totalPages = Math.ceil(totalPosts / perPage);
 
+    // Kiểm tra nếu số trang vượt quá tổng số trang
     if (page > totalPages) {
       return res.status(400).json({
         success: false,
@@ -96,6 +113,7 @@ router.get('/', async (req, res) => {
       });
     }
 
+    // Tìm danh sách sản phẩm
     const productList = await Products.find(query)
       .populate('category', 'name')
       .populate('subCat', 'name')
@@ -106,6 +124,7 @@ router.get('/', async (req, res) => {
       .limit(perPage)
       .lean();
 
+    // Trả về kết quả
     res.status(200).json({
       success: true,
       currentPage: page,

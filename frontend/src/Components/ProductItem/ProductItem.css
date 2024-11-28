@@ -6,6 +6,7 @@
   position: relative;
   overflow: hidden;
   transition: all 0.245s ease-in;
+  border-radius: 10px;
 }
 
 

@@ -1,73 +1,51 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
-import { Button } from "@mui/material";
-import FormControlLabel from "@mui/material/FormControlLabel";
-import RangeSlider from "react-range-slider-input";
-import "react-range-slider-input/dist/style.css";
-import Checkbox from "@mui/material/Checkbox";
-
-import "./SideBar.css";
-import { assets } from "../../assets/assets";
-const SideBar = () => {
+import { Radio, RadioGroup } from '@mui/material';
+import Checkbox from '@mui/material/Checkbox';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import React, { useContext, useState } from 'react';
+import RangeSlider from 'react-range-slider-input';
+import 'react-range-slider-input/dist/style.css';
+import { Link } from 'react-router-dom';
+import { MyContext } from '../../App';
+import { assets } from '../../assets/assets';
+import './SideBar.css';
+const SideBar = (props) => {
   const [value, setValue] = useState([100, 60000]);
-  const [value2, setValue2] = useState(0);
+  const context = useContext(MyContext);
+  const [filterSubCat, setFilterSubCat] = useState();
+
+  const handleChange = (event) => {
+    setFilterSubCat(event.target.value);
+    alert(event.target.value);
+  };
+
+  const filterBySubCat = (id) => {
+    alert(id);
+  };
   return (
     <div className="sideBar">
       <div className="sticky">
         <div className="filterBox">
           <h6>DANH MỤC SẢN PHẨM</h6>
           <div className="scroll">
-            <ul>
-              <li>
-                <FormControlLabel
-                  className="w-100"
-                  control={<Checkbox />}
-                  label="Men"
-                />
-              </li>
-              <li>
-                <FormControlLabel
-                  className="w-100"
-                  control={<Checkbox />}
-                  label="Women"
-                />
-              </li>
-              <li>
-                <FormControlLabel
-                  className="w-100"
-                  control={<Checkbox />}
-                  label="Boys"
-                />
-              </li>
-              <li>
-                <FormControlLabel
-                  className="w-100"
-                  control={<Checkbox />}
-                  label="Girls"
-                />
-              </li>
-              <li>
-                <FormControlLabel
-                  className="w-100"
-                  control={<Checkbox />}
-                  label="Điện tử"
-                />
-              </li>
-              <li>
-                <FormControlLabel
-                  className="w-100"
-                  control={<Checkbox />}
-                  label="Giày dép"
-                />
-              </li>
-              <li>
-                <FormControlLabel
-                  className="w-100"
-                  control={<Checkbox />}
-                  label="Sức khỏe"
-                />
-              </li>
-            </ul>
+            <RadioGroup
+              aria-labelledby="demo-controlled-radio-buttons-group"
+              name="controlled-radio-buttons-group"
+              value={filterSubCat}
+              onChange={handleChange}
+            >
+              {context.subCatData?.length !== 0 &&
+                context.subCatData?.map((item, index) => {
+                  return (
+                    <FormControlLabel
+                      value={item?._id}
+                      control={
+                        <Radio onChange={() => filterBySubCat(item?._id)} />
+                      }
+                      label={item?.subCat}
+                    />
+                  );
+                })}
+            </RadioGroup>
           </div>
         </div>
         <div className="filterBox">

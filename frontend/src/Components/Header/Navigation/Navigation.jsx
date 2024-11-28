@@ -70,14 +70,14 @@ const Navigation = (props) => {
                 props.navData?.map((item, index) => {
                   return (
                     <li className="list-inline-item" key={index}>
-                      <Link to={`/subCat/${item?.id}`}>
+                      <Link to="">
                         <Button> {item?.name} </Button>
                       </Link>
                       <div className="submenu shadow">
                         {context.subCatData?.length !== 0 &&
                           context.subCatData?.map((item, index) => {
                             return (
-                              <Link to="/" key={index}>
+                              <Link to={`/subCat/${item?.id}`} key={index}>
                                 <Button>{item.subCat}</Button>
                               </Link>
                             );
